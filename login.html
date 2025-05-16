@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MemeHQ - Login</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="stylesheet" href="styles/auth.css" />
+  </head>
+  <body>
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-header">
+          <i class="fas fa-fire logo-icon"></i>
+          <h1>MemeHQ</h1>
+          <p>The Internet's Playground for Memes</p>
+        </div>
+
+        <form id="loginForm" class="auth-form">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              required
+              placeholder="Enter your email"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              required
+              placeholder="Enter your password"
+            />
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </button>
+
+          <div class="auth-footer">
+            <p>
+              Don't have an account? <a href="#" id="switchToSignup">Sign up</a>
+            </p>
+          </div>
+        </form>
+
+        <form id="signupForm" class="auth-form" style="display: none">
+          <div class="form-group">
+            <label for="signupEmail">Email</label>
+            <input
+              type="email"
+              id="signupEmail"
+              required
+              placeholder="Enter your email"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="signupPassword">Password</label>
+            <input
+              type="password"
+              id="signupPassword"
+              required
+              placeholder="Create a password"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              required
+              placeholder="Confirm your password"
+            />
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i> Sign Up
+          </button>
+
+          <div class="auth-footer">
+            <p>
+              Already have an account? <a href="#" id="switchToLogin">Login</a>
+            </p>
+          </div>
+        </form>
+
+        <div id="authError" class="auth-error"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { handleLogin, handleSignup, initAuth } from "./scripts/auth.js";
+      import { showToast } from "./scripts/utils.js";
+
+      // Initialize auth state
+      initAuth();
+
+      // DOM elements
+      const loginForm = document.getElementById("loginForm");
+      const signupForm = document.getElementById("signupForm");
+      const switchToSignup = document.getElementById("switchToSignup");
+      const switchToLogin = document.getElementById("switchToLogin");
+      const authError = document.getElementById("authError");
+
+      // Switch between login and signup forms
+      switchToSignup.addEventListener("click", (e) => {
+        e.preventDefault();
+        loginForm.style.display = "none";
+        signupForm.style.display = "block";
+        authError.textContent = "";
+      });
+
+      switchToLogin.addEventListener("click", (e) => {
+        e.preventDefault();
+        signupForm.style.display = "none";
+        loginForm.style.display = "block";
+        authError.textContent = "";
+      });
+
+      // Handle login
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        const result = await handleLogin(email, password);
+        if (result.success) {
+          showToast("Login successful!", "success");
+        } else {
+          authError.textContent = result.error;
+        }
+      });
+
+      // Handle signup
+      signupForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("signupEmail").value;
+        const password = document.getElementById("signupPassword").value;
+        const confirmPassword =
+          document.getElementById("confirmPassword").value;
+
+        if (password !== confirmPassword) {
+          authError.textContent = "Passwords do not match";
+          return;
+        }
+
+        const result = await handleSignup(email, password);
+        if (result.success) {
+          showToast("Account created successfully!", "success");
+        } else {
+          authError.textContent = result.error;
+        }
+      });
+    </script>
+  </body>
+</html>

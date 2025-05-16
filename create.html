@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MemeHQ - Create Meme</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Comic+Neue:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="stylesheet" href="styles/creator.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="logo">
+          <i class="fas fa-fire"></i>
+          <span>MemeHQ</span>
+        </div>
+        <nav class="nav-menu">
+          <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+          </a>
+          <a href="create.html" class="nav-item active">
+            <i class="fas fa-plus-circle"></i>
+            <span>Create Meme</span>
+          </a>
+        </nav>
+        <div class="user-profile">
+          <img src="https://placehold.co/40" alt="User" id="userAvatar" />
+          <div class="user-info">
+            <span id="userName">Guest</span>
+            <button id="logoutBtn" style="display: none">Logout</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <header class="top-bar">
+          <h1>Create Your Meme</h1>
+          <button class="btn btn-primary" id="publishBtn">
+            <i class="fas fa-rocket"></i> Publish
+          </button>
+        </header>
+
+        <div class="creator-container">
+          <!-- Left Panel - Tools -->
+          <div class="tools-panel">
+            <div class="panel-section">
+              <h3><i class="fas fa-images"></i> Templates</h3>
+              <div class="template-grid" id="templateGrid">
+                <!-- Templates will be loaded here -->
+              </div>
+            </div>
+
+            <div class="panel-section">
+              <h3><i class="fas fa-upload"></i> Upload Image</h3>
+              <div class="upload-area" id="uploadArea">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Drag & drop your image here</p>
+                <input type="file" id="imageUpload" accept="image/*" />
+                <label for="imageUpload" class="btn btn-secondary"
+                  >Select File</label
+                >
+              </div>
+            </div>
+
+            <div class="panel-section">
+              <h3><i class="fas fa-link"></i> Image URL</h3>
+              <input
+                type="text"
+                id="imageUrlInput"
+                class="ai-input"
+                placeholder="Paste image URL here"
+              />
+              <button id="loadImageUrlBtn" class="btn btn-secondary">
+                Load Image
+              </button>
+            </div>
+          </div>
+
+          <!-- Center Panel - Canvas -->
+          <div class="canvas-panel">
+            <div class="canvas-wrapper" id="canvasWrapper">
+              <div class="loader" id="canvasLoader">
+                <i class="fas fa-spinner fa-spin"></i> Loading...
+              </div>
+              <canvas id="memeCanvas"></canvas>
+              <!-- Position indicators -->
+              <div class="position-indicator top"></div>
+              <div class="position-indicator middle"></div>
+              <div class="position-indicator bottom"></div>
+            </div>
+          </div>
+
+          <!-- Right Panel - Text Properties -->
+          <div class="properties-panel">
+            <div class="panel-section">
+              <h3><i class="fas fa-sliders-h"></i> Text Properties</h3>
+
+              <div class="form-group">
+                <label>Text Content</label>
+                <input
+                  type="text"
+                  id="textContent"
+                  placeholder="Enter your meme text"
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Font Family</label>
+                <select id="fontFamily">
+                  <option value="Impact">Impact</option>
+                  <option value="Arial">Arial</option>
+                  <option value="Comic Sans MS">Comic Sans</option>
+                  <option value="Times New Roman">Times New Roman</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Font Size</label>
+                <input
+                  type="range"
+                  id="fontSize"
+                  min="10"
+                  max="100"
+                  value="36"
+                />
+                <span id="fontSizeValue">36px</span>
+              </div>
+
+              <div class="form-group">
+                <label>Text Color</label>
+                <div class="color-picker">
+                  <input type="color" id="textColor" value="#ffffff" />
+                  <span class="color-value">#FFFFFF</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Text Outline Color</label>
+                <div class="color-picker">
+                  <input type="color" id="outlineColor" value="#000000" />
+                  <span class="color-value">#000000</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Text Position</label>
+                <div class="button-group">
+                  <button
+                    type="button"
+                    class="btn-text-option active"
+                    data-position="top"
+                  >
+                    Top
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-text-option"
+                    data-position="middle"
+                  >
+                    Middle
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-text-option"
+                    data-position="bottom"
+                  >
+                    Bottom
+                  </button>
+                </div>
+              </div>
+
+              <button class="btn btn-primary" id="addTextBtn">
+                <i class="fas fa-plus"></i> Add Text
+              </button>
+
+              <button class="btn btn-danger" id="deleteTextBtn">
+                <i class="fas fa-trash"></i> Delete Selected
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    <script type="module">
+      import { auth } from "./scripts/firebase.js";
+      import { saveMeme } from "./scripts/database.js";
+      import { uploadMemeImage } from "./scripts/storage.js";
+      import { showToast, showLoading, hideLoading } from "./scripts/utils.js";
+      import { initAuth, handleLogout } from "./scripts/auth.js";
+
+      // Initialize auth
+      initAuth();
+
+      // Meme templates
+      const MEME_TEMPLATES = [
+        {
+          id: 1,
+          name: "Distracted Boyfriend",
+          url: "https://i.imgflip.com/1bij.jpg",
+        },
+        {
+          id: 2,
+          name: "Drake Hotline Bling",
+          url: "https://i.imgflip.com/1g8my.jpg",
+        },
+        {
+          id: 3,
+          name: "Two Buttons",
+          url: "https://i.imgflip.com/1bgw.jpg",
+        },
+        {
+          id: 4,
+          name: "Batman Slapping Robin",
+          url: "https://i.imgflip.com/9ehk.jpg",
+        },
+      ];
+
+      // Meme editor state
+      const state = {
+        activeTextElement: null,
+        textElements: [],
+        canvasImage: null,
+        isLoading: false,
+        canvasWidth: 500,
+        canvasHeight: 500,
+      };
+
+      // DOM elements
+      const memeCanvas = document.getElementById("memeCanvas");
+      const ctx = memeCanvas.getContext("2d");
+      const canvasWrapper = document.getElementById("canvasWrapper");
+      const canvasLoader = document.getElementById("canvasLoader");
+      const templateGrid = document.getElementById("templateGrid");
+      const textContent = document.getElementById("textContent");
+      const fontFamily = document.getElementById("fontFamily");
+      const fontSize = document.getElementById("fontSize");
+      const fontSizeValue = document.getElementById("fontSizeValue");
+      const textColor = document.getElementById("textColor");
+      const outlineColor = document.getElementById("outlineColor");
+      const colorValue = document.querySelector(".color-value");
+      const addTextBtn = document.getElementById("addTextBtn");
+      const deleteTextBtn = document.getElementById("deleteTextBtn");
+      const publishBtn = document.getElementById("publishBtn");
+      const imageUpload = document.getElementById("imageUpload");
+      const uploadArea = document.getElementById("uploadArea");
+      const logoutBtn = document.getElementById("logoutBtn");
+      const positionButtons = document.querySelectorAll(".btn-text-option");
+      const imageUrlInput = document.getElementById("imageUrlInput");
+      const loadImageUrlBtn = document.getElementById("loadImageUrlBtn");
+
+      // Set up logout button
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", handleLogout);
+      }
+
+      // Initialize canvas
+      function initCanvas() {
+        memeCanvas.width = state.canvasWidth;
+        memeCanvas.height = state.canvasHeight;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, memeCanvas.width, memeCanvas.height);
+      }
+
+      // Load templates
+      function loadTemplates() {
+        templateGrid.innerHTML = MEME_TEMPLATES.map(
+          (template) => `
+          <div class="template-item">
+            <img src="${template.url}" alt="${template.name}" data-url="${template.url}">
+            <span class="template-name">${template.name}</span>
+          </div>
+        `
+        ).join("");
+
+        document.querySelectorAll(".template-item").forEach((item) => {
+          item.addEventListener("click", () => {
+            const url = item.querySelector("img").dataset.url;
+            loadTemplate(url);
+          });
+        });
+      }
+
+      // Load template or image
+      function loadTemplate(url) {
+        showLoader(true);
+        state.canvasImage = url;
+        state.textElements = [];
+        state.activeTextElement = null;
+
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.src = url;
+
+        img.onload = () => {
+          state.canvasWidth = img.width;
+          state.canvasHeight = img.height;
+          memeCanvas.width = img.width;
+          memeCanvas.height = img.height;
+          ctx.drawImage(img, 0, 0, img.width, img.height);
+          showLoader(false);
+        };
+
+        img.onerror = () => {
+          showLoader(false);
+          showToast("Failed to load image", "error");
+        };
+      }
+
+      // Show/hide loader
+      function showLoader(show) {
+        canvasLoader.style.display = show ? "block" : "none";
+        state.isLoading = show;
+      }
+
+      // Draw text on canvas
+      function drawText(text) {
+        if (!ctx || !state.canvasImage) return;
+
+        const img = new Image();
+        img.onload = () => {
+          ctx.clearRect(0, 0, memeCanvas.width, memeCanvas.height);
+          ctx.drawImage(img, 0, 0, memeCanvas.width, memeCanvas.height);
+
+          state.textElements.forEach((text) => {
+            ctx.save();
+            ctx.font = `${text.fontSize}px ${text.fontFamily}`;
+            ctx.fillStyle = text.color;
+            ctx.strokeStyle = text.outlineColor || "#000000";
+            ctx.lineWidth = text.fontSize / 10;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            const x = text.position.x * memeCanvas.width;
+            const y = text.position.y * memeCanvas.height;
+
+            ctx.strokeText(text.content, x, y);
+            ctx.fillText(text.content, x, y);
+            ctx.restore();
+          });
+        };
+        img.src = state.canvasImage;
+      }
+
+      // Add text element
+      function addTextElement() {
+        if (!state.canvasImage) {
+          showToast(
+            "Please select a template or upload an image first",
+            "error"
+          );
+          return;
+        }
+
+        const content = textContent.value.trim() || "Your Text Here";
+        const font = fontFamily.value;
+        const size = parseInt(fontSize.value);
+        const color = textColor.value;
+        const outline = outlineColor.value;
+
+        // Get selected position
+        const selectedPosition =
+          document.querySelector(".btn-text-option.active")?.dataset.position ||
+          "top";
+        let yPercentage = 0.2; // top by default
+
+        if (selectedPosition === "middle") yPercentage = 0.5;
+        if (selectedPosition === "bottom") yPercentage = 0.8;
+
+        const textObj = {
+          id: Date.now(),
+          content,
+          fontFamily: font,
+          fontSize: size,
+          color,
+          outlineColor: outline,
+          position: { x: 0.5, y: yPercentage },
+        };
+
+        state.textElements.push(textObj);
+        drawText(textObj);
+        state.activeTextElement = textObj;
+      }
+
+      // Delete selected text
+      function deleteSelectedText() {
+        if (state.textElements.length > 0) {
+          state.textElements.pop();
+          drawText();
+          state.activeTextElement = null;
+        }
+      }
+
+      // Handle image upload
+      function handleImageUpload(file) {
+        if (!file.type.match("image.*")) {
+          showToast("Please select an image file", "error");
+          return;
+        }
+
+        showLoader(true);
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            state.canvasWidth = img.width;
+            state.canvasHeight = img.height;
+            memeCanvas.width = img.width;
+            memeCanvas.height = img.height;
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+            state.canvasImage = file; // Store the file object for later upload
+            state.textElements = [];
+            state.activeTextElement = null;
+            showLoader(false);
+          };
+          img.onerror = () => {
+            showLoader(false);
+            showToast("Error loading image", "error");
+          };
+          img.src = e.target.result;
+        };
+        reader.onerror = () => {
+          showLoader(false);
+          showToast("Error reading image file", "error");
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // Handle image URL load
+      function handleImageUrlLoad() {
+        const url = imageUrlInput.value.trim();
+        if (!url) {
+          showToast("Please enter an image URL", "error");
+          return;
+        }
+
+        try {
+          new URL(url); // Validate URL
+          loadTemplate(url);
+        } catch (e) {
+          showToast("Please enter a valid image URL", "error");
+        }
+      }
+
+      // Publish meme
+      async function publishMeme() {
+        if (!auth.currentUser) {
+          showToast("Please login to publish memes", "error");
+          window.location.href = "login.html";
+          return;
+        }
+
+        if (!state.canvasImage) {
+          showToast("Please select a template or upload an image", "error");
+          return;
+        }
+
+        const originalBtnHTML = publishBtn.innerHTML;
+        showLoading(publishBtn);
+
+        try {
+          const user = auth.currentUser;
+          const title =
+            prompt("Enter a title for your meme:", "My Awesome Meme") ||
+            "Untitled Meme";
+
+          // Validate text elements
+          const validTextElements = state.textElements
+            .filter((text) => text.content && text.content.trim() !== "")
+            .map((text) => ({
+              content: text.content.trim(),
+              fontFamily: text.fontFamily || "Impact",
+              fontSize: Math.min(100, Math.max(10, text.fontSize || 36)),
+              color: text.color || "#ffffff",
+              outlineColor: text.outlineColor || "#000000",
+              position: {
+                x: Math.min(1, Math.max(0, text.position.x || 0.5)),
+                y: Math.min(1, Math.max(0, text.position.y || 0.2)),
+              },
+            }));
+
+          // First upload image if it's a file
+          let imageUrl;
+          if (state.canvasImage instanceof File) {
+            imageUrl = await uploadMemeImage(state.canvasImage, user.uid);
+          } else {
+            imageUrl = state.canvasImage; // Use template URL directly
+          }
+
+          // Prepare meme data
+          const memeData = {
+            title,
+            userId: user.uid,
+            userName: user.email,
+            imageUrl,
+            textElements: validTextElements,
+            createdAt: new Date().toISOString(),
+            likes: 0,
+            views: 0,
+            likedBy: [],
+          };
+
+          // Save to Firestore
+          await saveMeme(memeData);
+
+          showToast("Meme published successfully!", "success");
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 1500);
+        } catch (error) {
+          console.error("Publish error:", error);
+          showToast(`Publish failed: ${error.message}`, "error");
+        } finally {
+          hideLoading(publishBtn, originalBtnHTML);
+        }
+      }
+
+      // Initialize the app
+      document.addEventListener("DOMContentLoaded", () => {
+        initCanvas();
+        loadTemplates();
+        textContent.value = "Your Text Here";
+
+        // Set first position button as active by default
+        if (positionButtons.length > 0) {
+          positionButtons[0].classList.add("active");
+        }
+      });
+
+      // Event listeners
+      textContent.addEventListener("input", () => {
+        if (state.activeTextElement) {
+          state.activeTextElement.content = textContent.value;
+          drawText();
+        }
+      });
+
+      fontFamily.addEventListener("change", () => {
+        if (state.activeTextElement) {
+          state.activeTextElement.fontFamily = fontFamily.value;
+          drawText();
+        }
+      });
+
+      fontSize.addEventListener("input", () => {
+        fontSizeValue.textContent = `${fontSize.value}px`;
+        if (state.activeTextElement) {
+          state.activeTextElement.fontSize = parseInt(fontSize.value);
+          drawText();
+        }
+      });
+
+      textColor.addEventListener("input", () => {
+        colorValue.textContent = textColor.value.toUpperCase();
+        if (state.activeTextElement) {
+          state.activeTextElement.color = textColor.value;
+          drawText();
+        }
+      });
+
+      outlineColor.addEventListener("input", () => {
+        if (state.activeTextElement) {
+          state.activeTextElement.outlineColor = outlineColor.value;
+          drawText();
+        }
+      });
+
+      // Position buttons
+      positionButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          positionButtons.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          if (state.activeTextElement) {
+            const selectedPosition = btn.dataset.position;
+            let yPercentage = 0.2; // top by default
+            if (selectedPosition === "middle") yPercentage = 0.5;
+            if (selectedPosition === "bottom") yPercentage = 0.8;
+            state.activeTextElement.position.y = yPercentage;
+            drawText();
+          }
+        });
+      });
+
+      addTextBtn.addEventListener("click", addTextElement);
+      deleteTextBtn.addEventListener("click", deleteSelectedText);
+      publishBtn.addEventListener("click", publishMeme);
+      loadImageUrlBtn.addEventListener("click", handleImageUrlLoad);
+
+      imageUpload.addEventListener("change", (e) => {
+        if (e.target.files[0]) {
+          handleImageUpload(e.target.files[0]);
+        }
+      });
+
+      uploadArea.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = "var(--accent)";
+      });
+
+      uploadArea.addEventListener("dragleave", () => {
+        uploadArea.style.borderColor = "var(--gray)";
+      });
+
+      uploadArea.addEventListener("drop", (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = "var(--gray)";
+        if (e.dataTransfer.files[0]) {
+          handleImageUpload(e.dataTransfer.files[0]);
+        }
+      });
+    </script>
+  </body>
+</html>

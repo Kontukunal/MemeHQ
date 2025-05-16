@@ -1,0 +1,379 @@
+/* Creator Container */
+.creator-container {
+  display: grid;
+  grid-template-columns: 300px 1fr 300px;
+  flex-grow: 1;
+  padding: 20px;
+  gap: 20px;
+}
+
+/* Tools Panel */
+.tools-panel {
+  background-color: var(--darker);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.panel-section {
+  margin-bottom: 20px;
+}
+
+.panel-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.template-item {
+  aspect-ratio: 1;
+  border-radius: 5px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.template-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.template-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px var(--secondary);
+}
+
+.upload-area {
+  border: 2px dashed var(--gray);
+  border-radius: 10px;
+  padding: 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.upload-area i {
+  font-size: 2rem;
+  color: var(--gray);
+  margin-bottom: 10px;
+}
+
+.upload-area p {
+  margin-bottom: 15px;
+  color: var(--gray);
+}
+
+.upload-area:hover {
+  border-color: var(--accent);
+  background-color: rgba(0, 206, 201, 0.05);
+}
+
+#imageUpload {
+  display: none;
+}
+
+.ai-input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid var(--gray);
+  background-color: var(--darker);
+  color: var(--light);
+  margin-bottom: 10px;
+}
+
+.ai-suggestions {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 10px;
+  border-radius: 5px;
+  background-color: var(--darker);
+  padding: 10px;
+}
+
+.ai-suggestion {
+  padding: 8px;
+  margin-bottom: 5px;
+  background-color: rgba(253, 121, 168, 0.1);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.ai-suggestion:hover {
+  background-color: rgba(253, 121, 168, 0.2);
+}
+
+/* Canvas Panel */
+.canvas-panel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.canvas-wrapper {
+  position: relative;
+  max-width: 100%;
+  max-height: 70vh;
+  background-color: var(--darker);
+  border-radius: 10px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+  overflow: visible;
+}
+
+.meme-canvas {
+  max-width: 100%;
+  max-height: 70vh;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.text-element {
+  position: absolute;
+  color: white;
+  font-family: "Impact", sans-serif;
+  font-size: 36px;
+  text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000,
+    -2px 2px 0 #000;
+  cursor: move;
+  user-select: none;
+  padding: 5px;
+  max-width: 100%;
+  word-wrap: break-word;
+  text-align: center;
+  z-index: 2;
+  pointer-events: auto;
+  background-color: transparent;
+}
+
+.text-element.active {
+  outline: 2px dashed var(--accent);
+}
+
+.resize-handle {
+  width: 10px;
+  height: 10px;
+  background-color: var(--accent);
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  cursor: nwse-resize;
+}
+
+/* Properties Panel */
+.properties-panel {
+  background-color: var(--darker);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+.form-group input[type="text"],
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid var(--gray);
+  background-color: rgba(0, 0, 0, 0.3);
+  color: var(--light);
+}
+
+.form-group input[type="range"] {
+  width: 100%;
+  margin-top: 5px;
+}
+
+.color-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.color-picker input[type="color"] {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.color-value {
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.btn-text-option {
+  flex: 1;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 5px;
+  color: var(--light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.btn-text-option.active {
+  background-color: var(--primary);
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .creator-container {
+    grid-template-columns: 250px 1fr 250px;
+  }
+}
+
+@media (max-width: 992px) {
+  .creator-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  .tools-panel,
+  .properties-panel {
+    order: 1;
+  }
+
+  .canvas-panel {
+    order: 2;
+    margin: 20px 0;
+  }
+}
+
+/* Add to creator.css */
+.text-preview {
+  display: inline-block;
+  margin: 2px;
+  padding: 2px 5px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 3px;
+}
+
+.meme-text-preview {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.template-name {
+  display: block;
+  text-align: center;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  color: var(--light);
+}
+/* Add these to your existing creator.css */
+.text-element.active {
+  outline: 2px dashed var(--accent);
+}
+
+.text-controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.text-element {
+  position: absolute;
+  cursor: move;
+  user-select: none;
+  max-width: 100%;
+  word-break: break-word;
+  text-align: center;
+  padding: 5px;
+}
+
+.canvas-container {
+  position: relative;
+  margin: 0 auto;
+}
+
+#memeCanvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  background-color: var(--darker);
+  border-radius: 5px;
+}
+
+/* Position indicators */
+.position-indicator {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background-color: rgba(0, 206, 201, 0.5);
+  z-index: 1;
+}
+
+.position-indicator.top {
+  top: 20%;
+}
+
+.position-indicator.middle {
+  top: 50%;
+}
+
+.position-indicator.bottom {
+  top: 80%;
+}
+
+/* Add to your CSS file */
+.meme-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.meme-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.meme-text-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2; /* Ensure canvas is above the image */
+}
+
+.meme-card {
+  position: relative;
+  overflow: hidden;
+}

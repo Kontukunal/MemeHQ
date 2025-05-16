@@ -1,0 +1,134 @@
+.dashboard-content {
+  padding: 20px;
+  flex-grow: 1;
+}
+
+.meme-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.filter-btn {
+  padding: 8px 15px;
+  border-radius: 20px;
+  border: none;
+  background-color: var(--darker);
+  color: var(--light);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
+
+.filter-btn.active {
+  background-color: var(--primary);
+  color: white;
+}
+
+.meme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.meme-card {
+  background-color: var(--darker);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.3s;
+  cursor: pointer;
+  position: relative;
+}
+
+.meme-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.meme-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.meme-info {
+  padding: 15px;
+}
+
+.meme-info h3 {
+  margin-bottom: 5px;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meme-info p {
+  color: var(--gray);
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+}
+
+.meme-stats {
+  display: flex;
+  gap: 15px;
+  font-size: 0.8rem;
+  color: var(--gray);
+}
+
+.meme-stats i {
+  margin-right: 5px;
+}
+
+.meme-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 5px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.meme-card:hover .meme-actions {
+  opacity: 1;
+}
+
+.meme-action-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.7);
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.meme-action-btn:hover {
+  background-color: var(--primary);
+  transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .meme-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .meme-filters {
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+
+  .meme-filters::-webkit-scrollbar {
+    height: 5px;
+  }
+
+  .meme-filters::-webkit-scrollbar-thumb {
+    background-color: var(--gray);
+    border-radius: 5px;
+  }
+}
