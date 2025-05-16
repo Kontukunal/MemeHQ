@@ -132,3 +132,252 @@
     border-radius: 5px;
   }
 }
+
+
+/* Leaderboard */
+.leaderboard-section {
+  margin-top: 40px;
+  background-color: var(--darker);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.leaderboard-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+}
+
+.leaderboard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px 15px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  transition: var(--transition);
+}
+
+.leaderboard-item:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.leaderboard-rank {
+  font-weight: 700;
+  width: 20px;
+  text-align: center;
+}
+
+.leaderboard-item:nth-child(1) .leaderboard-rank {
+  color: gold;
+  font-size: 1.2rem;
+}
+
+.leaderboard-item:nth-child(2) .leaderboard-rank {
+  color: silver;
+  font-size: 1.1rem;
+}
+
+.leaderboard-item:nth-child(3) .leaderboard-rank {
+  color: #cd7f32; /* bronze */
+}
+
+.leaderboard-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.leaderboard-info {
+  flex: 1;
+}
+
+.leaderboard-name {
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.leaderboard-stats {
+  display: flex;
+  gap: 15px;
+  font-size: 0.8rem;
+  color: var(--gray);
+}
+
+.leaderboard-score {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Add to dashboard.css */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-top: 30px;
+  padding: 20px;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--primary);
+  color: white;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  background-color: var(--gray);
+  cursor: not-allowed;
+}
+
+/* Add to creator.css */
+.position-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.position-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.position-sliders label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.preset-buttons {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.btn-position-preset {
+  flex: 1;
+  padding: 5px;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  border-radius: 4px;
+  color: var(--light);
+  cursor: pointer;
+}
+
+.btn-position-preset:hover {
+  background: var(--primary);
+}
+
+/* Feed Header */
+.feed-header {
+  margin-bottom: 20px;
+  background-color: var(--darker);
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.feed-tabs {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 15px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+}
+
+.tab-btn {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--light);
+  cursor: pointer;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+  background-color: var(--primary);
+  color: white;
+}
+
+.search-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.search-bar {
+  display: flex;
+  position: relative;
+}
+
+.search-bar input {
+  flex: 1;
+  padding: 10px 15px;
+  padding-right: 40px;
+  border-radius: 20px;
+  border: none;
+  background-color: rgba(0, 0, 0, 0.3);
+  color: var(--light);
+}
+
+.search-bar button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--gray);
+  cursor: pointer;
+}
+
+.trending-tags {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+}
+
+.trending-tags span:first-child {
+  color: var(--gray);
+}
+
+.trending-tag {
+  background-color: rgba(108, 92, 231, 0.2);
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.trending-tag:hover {
+  background-color: var(--primary);
+  color: white;
+}
+
+/* Infinite scroll loader */
+.infinite-scroll-loader {
+  text-align: center;
+  padding: 20px;
+  display: none;
+}
+
+.infinite-scroll-loader.active {
+  display: block;
+}

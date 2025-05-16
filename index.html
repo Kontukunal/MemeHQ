@@ -1,340 +1,626 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MemeHQ - Dashboard</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Comic+Neue:wght@700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <link rel="stylesheet" href="styles/main.css" />
-    <link rel="stylesheet" href="styles/dashboard.css" />
-  </head>
-  <body>
-    <div class="app-container">
-      <!-- Sidebar -->
-      <div class="sidebar">
-        <div class="logo">
-          <i class="fas fa-fire"></i>
-          <span>MemeHQ</span>
-        </div>
-        <nav class="nav-menu">
-          <a href="index.html" class="nav-item active">
-            <i class="fas fa-home"></i>
-            <span>Dashboard</span>
-          </a>
-          <a
-            href="create.html"
-            class="nav-item auth-required"
-            style="display: none"
-          >
-            <i class="fas fa-plus-circle"></i>
-            <span>Create Meme</span>
-          </a>
-        </nav>
-        <div class="user-profile">
-          <img src="https://placehold.co/40" alt="User" id="userAvatar" />
-          <div class="user-info">
-            <span id="userName">Guest</span>
-            <button id="logoutBtn" style="display: none">Logout</button>
-            <a href="login.html" id="loginBtn">Login</a>
-          </div>
-        </div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MemeHQ - Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/dashboard.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <i class="fas fa-fire"></i>
+        <span>MemeHQ</span>
       </div>
-
-      <!-- Main Content -->
-      <div class="main-content">
-        <header class="top-bar">
-          <h1>Trending Memes</h1>
-          <div class="search-bar">
-            <input type="text" placeholder="Search memes..." id="searchInput" />
-            <i class="fas fa-search"></i>
-          </div>
-        </header>
-
-        <div class="dashboard-content">
-          <div class="meme-filters">
-            <button class="filter-btn active" data-filter="all">
-              All Memes
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-item active">
+          <i class="fas fa-home"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="create.html" class="nav-item auth-required">
+          <i class="fas fa-plus-circle"></i>
+          <span>Create Meme</span>
+        </a>
+        <a href="analytics.html" class="nav-item auth-required">
+          <i class="fas fa-chart-line"></i>
+          <span>Analytics</span>
+        </a>
+        <a href="leaderboard.html" class="nav-item">
+          <i class="fas fa-trophy"></i>
+          <span>Leaderboard</span>
+        </a>
+        <a href="badges.html" class="nav-item auth-required">
+          <i class="fas fa-medal"></i>
+          <span>My Badges</span>
+        </a>
+      </nav>
+      <div class="user-profile">
+        <img src="https://placehold.co/40" alt="User" id="userAvatar">
+        <div class="user-info">
+          <span id="userName">Guest</span>
+          <div class="user-actions">
+            <button id="logoutBtn" class="logout-btn">
+              <i class="fas fa-sign-out-alt"></i> Logout
             </button>
-            <button class="filter-btn" data-filter="popular">
-              Most Popular
-            </button>
-            <button class="filter-btn" data-filter="recent">Recent</button>
-          </div>
-
-          <div class="meme-grid" id="memeGrid">
-            <div class="loader">
-              <i class="fas fa-spinner fa-spin"></i> Loading memes...
-            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <script type="module">
-      import { auth } from "./scripts/firebase.js";
-      import {
-        getAllMemes,
-        getTrendingMemes,
-        likeMeme,
-        unlikeMeme,
-      } from "./scripts/database.js";
-      import { showToast, formatDate, debounce } from "./scripts/utils.js";
-      import { initAuth, handleLogout } from "./scripts/auth.js";
+    <!-- Main Content -->
+    <div class="main-content">
+      <header class="top-bar">
+        <h1>Trending Memes</h1>
+      </header>
 
-      // Initialize auth
-      initAuth();
+      <div class="dashboard-content">
+        <div class="feed-header">
+          <div class="feed-tabs">
+            <button class="tab-btn active" data-filter="new">New</button>
+            <button class="tab-btn" data-filter="top-24h">Top (24h)</button>
+            <button class="tab-btn" data-filter="top-week">Top (Week)</button>
+            <button class="tab-btn" data-filter="top-all">Top (All Time)</button>
+          </div>
+          <div class="search-container">
+            <div class="search-bar">
+              <input type="text" id="searchInput" placeholder="Search memes or #tags...">
+              <button id="searchBtn"><i class="fas fa-search"></i></button>
+            </div>
+            <div class="trending-tags" id="trendingTags">
+              <span>Trending:</span>
+              <!-- Will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
 
-      // DOM elements
-      const memeGrid = document.getElementById("memeGrid");
-      const searchInput = document.getElementById("searchInput");
-      const filterButtons = document.querySelectorAll(".filter-btn");
-      const logoutBtn = document.getElementById("logoutBtn");
-      const loginBtn = document.getElementById("loginBtn");
+        <div class="meme-grid" id="memeGrid">
+          <div class="loader">
+            <i class="fas fa-spinner fa-spin"></i> Loading memes...
+          </div>
+        </div>
 
-      // Set up logout button
-      if (logoutBtn) {
-        logoutBtn.addEventListener("click", handleLogout);
-      }
+        <div class="infinite-scroll-loader">
+          <i class="fas fa-spinner fa-spin"></i> Loading more memes...
+        </div>
 
-      // Load memes based on filter
-      async function loadMemes(filter = "all") {
-        try {
-          memeGrid.innerHTML =
-            '<div class="loader"><i class="fas fa-spinner fa-spin"></i> Loading memes...</div>';
+        <!-- Leaderboard Section -->
+        <div class="leaderboard-section">
+          <h2><i class="fas fa-crown"></i> Weekly Leaderboard</h2>
+          <div class="leaderboard" id="leaderboard">
+            <div class="loader">
+              <i class="fas fa-spinner fa-spin"></i> Loading leaderboard...
+            </div>
+          </div>
+        </div>
+      </div>
 
-          let memes = [];
+      <div class="infinite-scroll-loader">
+  <i class="fas fa-spinner fa-spin"></i> Loading more memes...
+</div>
+    </div>
+  </div>
 
-          if (filter === "all") {
-            memes = await getAllMemes();
-          } else if (filter === "popular") {
-            memes = await getTrendingMemes();
-          } else if (filter === "recent") {
-            memes = await getAllMemes();
-            memes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-          }
+  <script type="module">
+    import { auth, db } from "./scripts/firebase.js";
+    import { 
+      collection, 
+      query, 
+      where, 
+      getDocs, 
+      orderBy, 
+      limit, 
+      startAfter,
+      doc,
+      getDoc,
+      updateDoc,
+      arrayUnion,
+      arrayRemove,
+      increment
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { showToast, formatDate, debounce } from "./scripts/utils.js";
+    import { initAuth, handleLogout } from "./scripts/auth.js";
 
-          displayMemes(memes);
-        } catch (error) {
-          console.error("Error loading memes:", error);
-          showError(error);
+    // Initialize auth
+    initAuth();
+
+    // Constants
+    const MEMES_PER_PAGE = 12;
+    let lastVisibleDoc = null;
+    let currentFilter = 'new';
+    let isLoading = false;
+    let hasMoreMemes = true;
+
+    // DOM elements
+    const memeGrid = document.getElementById("memeGrid");
+    const searchInput = document.getElementById("searchInput");
+    const searchBtn = document.getElementById("searchBtn");
+    const trendingTags = document.getElementById("trendingTags");
+    const leaderboard = document.getElementById("leaderboard");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const tabButtons = document.querySelectorAll(".tab-btn");
+
+    // Set up logout button
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", handleLogout);
+    }
+
+    // Load memes based on filter and search
+    async function loadMemes(filter = currentFilter, searchQuery = '', loadMore = false) {
+      if (isLoading) return;
+      isLoading = true;
+      
+      try {
+        // Show loader
+        if (!loadMore) {
+          memeGrid.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-spin"></i> Loading memes...</div>';
+          lastVisibleDoc = null;
+          hasMoreMemes = true;
+        } else {
+          document.querySelector('.infinite-scroll-loader').classList.add('active');
         }
-      }
 
-      function displayMemes(memes) {
-        if (memes.length === 0) {
-          memeGrid.innerHTML = `
+        let memesQuery;
+        const memesRef = collection(db, "memes");
+        
+        // Build query based on filter
+        switch(filter) {
+          case 'top-24h':
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            memesQuery = query(
+              memesRef,
+              where("createdAt", ">", yesterday),
+              orderBy("likes", "desc"),
+              limit(MEMES_PER_PAGE)
+            );
+            break;
+            
+          case 'top-week':
+            const lastWeek = new Date();
+            lastWeek.setDate(lastWeek.getDate() - 7);
+            memesQuery = query(
+              memesRef,
+              where("createdAt", ">", lastWeek),
+              orderBy("likes", "desc"),
+              limit(MEMES_PER_PAGE)
+            );
+            break;
+            
+          case 'top-all':
+            memesQuery = query(
+              memesRef,
+              orderBy("likes", "desc"),
+              limit(MEMES_PER_PAGE)
+            );
+            break;
+            
+          case 'new':
+          default:
+            memesQuery = query(
+              memesRef,
+              orderBy("createdAt", "desc"),
+              limit(MEMES_PER_PAGE)
+            );
+        }
+        
+        // Apply search if provided
+        if (searchQuery) {
+          if (searchQuery.startsWith('#')) {
+            const tag = searchQuery.substring(1).toLowerCase();
+            memesQuery = query(
+              memesRef,
+              where("lowercaseTags", "array-contains", tag),
+              orderBy("createdAt", "desc"),
+              limit(MEMES_PER_PAGE)
+            );
+          } else {
+            // Simple search - consider using Algolia for better search
+            memesQuery = query(
+              memesRef,
+              orderBy("title"),
+              startAt(searchQuery),
+              endAt(searchQuery + '\uf8ff'),
+              limit(MEMES_PER_PAGE)
+            );
+          }
+        }
+        
+        // For infinite scroll/pagination
+        if (loadMore && lastVisibleDoc) {
+          memesQuery = query(memesQuery, startAfter(lastVisibleDoc));
+        }
+        
+        const querySnapshot = await getDocs(memesQuery);
+        
+        if (querySnapshot.empty) {
+          if (loadMore) {
+            hasMoreMemes = false;
+          } else {
+            memeGrid.innerHTML = `
+              <div class="empty-state">
+                <i class="fas fa-meh"></i>
+                <h3>No memes found</h3>
+                <p>Try a different search or <a href="create.html">create one!</a></p>
+              </div>
+            `;
+          }
+          return;
+        }
+        
+        // Store last document for pagination
+        lastVisibleDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+        
+        const memes = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        // Append or replace memes
+        if (loadMore) {
+          displayMemes(memes, true);
+        } else {
+          displayMemes(memes);
+        }
+        
+        // Load trending tags if not searching
+        if (!searchQuery && !loadMore) {
+          loadTrendingTags();
+        }
+        
+        // Load leaderboard if not searching
+        if (!searchQuery) {
+          loadLeaderboard();
+        }
+        
+      } catch (error) {
+        console.error("Error loading memes:", error);
+        showToast("Failed to load memes", "error");
+      } finally {
+        isLoading = false;
+        document.querySelector('.infinite-scroll-loader').classList.remove('active');
+      }
+    }
+
+    // Display memes in the grid
+    function displayMemes(memes, append = false) {
+      if (!append) {
+        memeGrid.innerHTML = '';
+      }
+      
+      if (memes.length === 0 && !append) {
+        memeGrid.innerHTML = `
           <div class="empty-state">
             <i class="fas fa-meh"></i>
             <h3>No memes found</h3>
             <p>Be the first to <a href="create.html">create a meme!</a></p>
           </div>
         `;
-          return;
-        }
-
-        memeGrid.innerHTML = memes
-          .map(
-            (meme) => `
+        return;
+      }
+      
+      const memesHTML = memes.map(meme => `
         <div class="meme-container" data-id="${meme.id}">
           <div class="meme-card">
-            <img src="${meme.imageUrl}" alt="${
-              meme.title
-            }" loading="lazy" class="meme-image">
+            <img src="placeholder.jpg" data-src="${meme.imageUrl}" alt="${meme.title}" loading="lazy" class="meme-image">
             <canvas class="meme-text-canvas"></canvas>
             <div class="meme-info">
               <h3>${meme.title || "Untitled Meme"}</h3>
               <p>Created by ${meme.userName || "Anonymous"}</p>
               <p>${formatDate(meme.createdAt)}</p>
               <div class="meme-stats">
-                <span class="like-btn ${
-                  meme.likedBy?.includes(auth.currentUser?.uid) ? "liked" : ""
-                }" 
-                      data-liked="${!!meme.likedBy?.includes(
-                        auth.currentUser?.uid
-                      )}">
+                <span class="like-btn ${meme.likedBy?.includes(auth.currentUser?.uid) ? "liked" : ""}" 
+                      data-liked="${!!meme.likedBy?.includes(auth.currentUser?.uid)}">
                   <i class="fas fa-heart"></i> ${meme.likes || 0}
                 </span>
-                <span><i class="fas fa-share-alt share-btn"></i></span>
+                <span class="comment-count">
+                  <i class="fas fa-comment"></i> ${meme.commentCount || 0}
+                </span>
               </div>
+            </div>
+            <div class="meme-actions">
+              <button class="meme-action-btn share-btn" data-platform="twitter" title="Share on Twitter">
+                <i class="fab fa-twitter"></i>
+              </button>
+              <button class="meme-action-btn share-btn" data-platform="facebook" title="Share on Facebook">
+                <i class="fab fa-facebook-f"></i>
+              </button>
+              <button class="meme-action-btn share-btn" data-platform="copy" title="Copy link">
+                <i class="fas fa-link"></i>
+              </button>
             </div>
           </div>
         </div>
-      `
-          )
-          .join("");
+      `).join('');
+      
+      if (append) {
+        memeGrid.innerHTML += memesHTML;
+      } else {
+        memeGrid.innerHTML = memesHTML;
+      }
+      
+      // After adding to DOM, render text on each meme
+      memes.forEach((meme, index) => {
+        if (meme.textElements && meme.textElements.length > 0) {
+          renderTextOnMeme(meme, index);
+        }
+      });
+      
+      // Add event listeners
+      setupMemeInteractions();
+      setupLazyLoading();
+    }
 
-        // After adding to DOM, render text on each meme
-        memes.forEach((meme, index) => {
-          if (meme.textElements && meme.textElements.length > 0) {
-            renderTextOnMeme(meme, index);
+    // Render text on meme canvas
+    function renderTextOnMeme(meme, index) {
+      const memeContainer = document.querySelectorAll(".meme-container")[index];
+      if (!memeContainer) return;
+
+      const canvas = memeContainer.querySelector(".meme-text-canvas");
+      const img = memeContainer.querySelector(".meme-image");
+
+      if (!canvas || !img) return;
+
+      const render = () => {
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        meme.textElements.forEach((text) => {
+          ctx.save();
+          try {
+            ctx.font = `${text.fontSize}px ${text.fontFamily}`;
+            ctx.fillStyle = text.color;
+            ctx.strokeStyle = text.outlineColor || "#000000";
+            ctx.lineWidth = Math.max(2, text.fontSize / 10);
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            const x = text.position.x * canvas.width;
+            const y = text.position.y * canvas.height;
+
+            ctx.strokeText(text.content, x, y);
+            ctx.fillText(text.content, x, y);
+          } catch (error) {
+            console.error("Error drawing text:", error);
+          } finally {
+            ctx.restore();
           }
         });
+      };
 
-        // Add event listeners
-        setupMemeInteractions();
+      if (img.complete) {
+        render();
+      } else {
+        img.onload = render;
+        img.onerror = () => console.error("Failed to load meme image");
       }
+    }
 
-      function renderTextOnMeme(meme, index) {
-        const memeContainer =
-          document.querySelectorAll(".meme-container")[index];
-        if (!memeContainer) return;
+    // Setup meme interactions (like, share)
+    function setupMemeInteractions() {
+      // Like buttons
+      document.querySelectorAll(".like-btn").forEach((btn) => {
+        btn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          if (!auth.currentUser) {
+            showToast("Please login to like memes", "error");
+            return;
+          }
 
-        const canvas = memeContainer.querySelector(".meme-text-canvas");
-        const img = memeContainer.querySelector(".meme-image");
+          const memeId = btn.closest(".meme-container").dataset.id;
+          const isLiked = btn.dataset.liked === "true";
 
-        if (!canvas || !img) return;
-
-        const render = () => {
-          canvas.width = img.naturalWidth || img.width;
-          canvas.height = img.naturalHeight || img.height;
-
-          const ctx = canvas.getContext("2d");
-          if (!ctx) return;
-
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-          meme.textElements.forEach((text) => {
-            ctx.save();
-            try {
-              ctx.font = `${text.fontSize}px ${text.fontFamily}`;
-              ctx.fillStyle = text.color;
-              ctx.strokeStyle = text.outlineColor || "#000000";
-              ctx.lineWidth = Math.max(2, text.fontSize / 10);
-              ctx.textAlign = "center";
-              ctx.textBaseline = "middle";
-
-              const x = text.position.x * canvas.width;
-              const y = text.position.y * canvas.height;
-
-              ctx.strokeText(text.content, x, y);
-              ctx.fillText(text.content, x, y);
-            } catch (error) {
-              console.error("Error drawing text:", error);
-            } finally {
-              ctx.restore();
-            }
-          });
-        };
-
-        if (img.complete) {
-          render();
-        } else {
-          img.onload = render;
-          img.onerror = () => console.error("Failed to load meme image");
-        }
-      }
-
-      function setupMemeInteractions() {
-        // Like buttons
-        document.querySelectorAll(".like-btn").forEach((btn) => {
-          btn.addEventListener("click", async (e) => {
-            e.stopPropagation();
-            if (!auth.currentUser) {
-              showToast("Please login to like memes", "error");
-              return;
-            }
-
-            const memeId = btn.closest(".meme-container").dataset.id;
-            const isLiked = btn.dataset.liked === "true";
-
-            try {
-              if (isLiked) {
-                await unlikeMeme(memeId, auth.currentUser.uid);
-                btn.dataset.liked = "false";
-                btn.classList.remove("liked");
-                const likesCount = parseInt(btn.textContent.match(/\d+/)[0]);
-                btn.innerHTML = `<i class="fas fa-heart"></i> ${
-                  likesCount - 1
-                }`;
-                showToast("Meme unliked", "success");
-              } else {
-                await likeMeme(memeId, auth.currentUser.uid);
-                btn.dataset.liked = "true";
-                btn.classList.add("liked");
-                const likesCount = parseInt(btn.textContent.match(/\d+/)[0]);
-                btn.innerHTML = `<i class="fas fa-heart"></i> ${
-                  likesCount + 1
-                }`;
-                showToast("Meme liked!", "success");
-              }
-            } catch (error) {
-              showToast(error.message, "error");
-            }
-          });
-        });
-
-        // Share buttons
-        document.querySelectorAll(".share-btn").forEach((btn) => {
-          btn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            if (!auth.currentUser) {
-              showToast("Please login to share memes", "error");
-              return;
-            }
-
-            const memeId = btn.closest(".meme-container").dataset.id;
-            const url = `${window.location.origin}/index.html?meme=${memeId}`;
-
-            if (navigator.share) {
-              navigator
-                .share({
-                  title: "Check out this meme on MemeHQ!",
-                  url: url,
-                })
-                .catch((err) => {
-                  console.log("Error sharing:", err);
-                });
+          try {
+            if (isLiked) {
+              await unlikeMeme(memeId, auth.currentUser.uid);
+              btn.dataset.liked = "false";
+              btn.classList.remove("liked");
+              const likesCount = parseInt(btn.textContent.match(/\d+/)[0]);
+              btn.innerHTML = `<i class="fas fa-heart"></i> ${likesCount - 1}`;
+              showToast("Meme unliked", "success");
             } else {
-              navigator.clipboard.writeText(url);
-              showToast("Link copied to clipboard!", "success");
+              await likeMeme(memeId, auth.currentUser.uid);
+              btn.dataset.liked = "true";
+              btn.classList.add("liked");
+              const likesCount = parseInt(btn.textContent.match(/\d+/)[0]);
+              btn.innerHTML = `<i class="fas fa-heart"></i> ${likesCount + 1}`;
+              showToast("Meme liked!", "success");
             }
-          });
-        });
-      }
-
-      // Initialize with all memes
-      loadMemes();
-
-      // Filter buttons
-      filterButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-          filterButtons.forEach((btn) => btn.classList.remove("active"));
-          button.classList.add("active");
-          loadMemes(button.dataset.filter);
+          } catch (error) {
+            showToast(error.message, "error");
+          }
         });
       });
 
-      // Search functionality
-      searchInput.addEventListener(
-        "input",
-        debounce(() => {
-          const searchTerm = searchInput.value.toLowerCase();
-          const memes = document.querySelectorAll(".meme-container");
+      // Share buttons
+      document.querySelectorAll(".share-btn").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const memeId = btn.closest(".meme-container").dataset.id;
+          const platform = btn.dataset.platform;
+          shareMeme(memeId, platform);
+        });
+      });
+    }
 
-          memes.forEach((meme) => {
-            const title = meme.querySelector("h3").textContent.toLowerCase();
-            const creator = meme.querySelector("p").textContent.toLowerCase();
-            const texts =
-              meme
-                .querySelector(".meme-text-canvas")
-                ?.textContent.toLowerCase() || "";
+    // Share meme function
+    async function shareMeme(memeId, platform) {
+      const url = `${window.location.origin}/index.html?meme=${memeId}`;
+      const text = "Check out this awesome meme from MemeHQ!";
+      
+      switch(platform) {
+        case 'twitter':
+          window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
+          break;
+        case 'facebook':
+          window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+          break;
+        case 'copy':
+          navigator.clipboard.writeText(url);
+          showToast('Link copied to clipboard!', 'success');
+          break;
+      }
+    }
 
-            meme.style.display =
-              title.includes(searchTerm) ||
-              creator.includes(searchTerm) ||
-              texts.includes(searchTerm)
-                ? "block"
-                : "none";
+    // Like/unlike meme functions
+    async function likeMeme(memeId, userId) {
+      const memeRef = doc(db, "memes", memeId);
+      const memeSnap = await getDoc(memeRef);
+
+      if (memeSnap.exists() && memeSnap.data().likedBy.includes(userId)) {
+        throw new Error("You've already liked this meme");
+      }
+
+      await updateDoc(memeRef, {
+        likes: increment(1),
+        likedBy: arrayUnion(userId)
+      });
+    }
+
+    async function unlikeMeme(memeId, userId) {
+      const memeRef = doc(db, "memes", memeId);
+      await updateDoc(memeRef, {
+        likes: increment(-1),
+        likedBy: arrayRemove(userId)
+      });
+    }
+
+    // Load trending tags
+    async function loadTrendingTags() {
+      try {
+        const tagsRef = collection(db, "trendingTags");
+        const tagsSnapshot = await getDocs(query(tagsRef, orderBy("count", "desc"), limit(5)));
+        
+        const trendingTags = tagsSnapshot.docs.map(doc => doc.id);
+        
+        // Clear existing tags except the "Trending:" label
+        while (trendingTags.children.length > 1) {
+          trendingTags.removeChild(trendingTags.lastChild);
+        }
+        
+        // Add new tags
+        trendingTags.forEach(tag => {
+          const tagElement = document.createElement('span');
+          tagElement.className = 'trending-tag';
+          tagElement.textContent = `#${tag}`;
+          tagElement.addEventListener('click', () => {
+            searchInput.value = `#${tag}`;
+            loadMemes(currentFilter, `#${tag}`);
           });
-        }, 300)
-      );
-    </script>
-  </body>
+          trendingTags.appendChild(tagElement);
+        });
+        
+      } catch (error) {
+        console.error("Error loading trending tags:", error);
+      }
+    }
+
+    // Load leaderboard
+    async function loadLeaderboard() {
+      try {
+        leaderboard.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-spin"></i> Loading leaderboard...</div>';
+        
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, orderBy("totalLikes", "desc"), limit(10));
+        const querySnapshot = await getDocs(q);
+        
+        const leaders = querySnapshot.docs.map((doc, index) => ({
+          id: doc.id,
+          rank: index + 1,
+          ...doc.data()
+        }));
+        
+        if (leaders.length === 0) {
+          leaderboard.innerHTML = '<div class="empty-state">No leaderboard data yet</div>';
+          return;
+        }
+        
+        leaderboard.innerHTML = leaders.map(user => `
+          <div class="leaderboard-item">
+            <div class="leaderboard-rank">${user.rank}</div>
+            <img src="${user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username || user.email)}&background=random`}" 
+                 alt="${user.username || user.email}" class="leaderboard-avatar">
+            <div class="leaderboard-info">
+              <div class="leaderboard-name">${user.username || user.email.split('@')[0]}</div>
+              <div class="leaderboard-stats">
+                <span><i class="fas fa-heart"></i> ${user.totalLikes || 0}</span>
+                <span><i class="fas fa-image"></i> ${user.memeCount || 0}</span>
+              </div>
+            </div>
+            <div class="leaderboard-score">${user.totalLikes || 0}</div>
+          </div>
+        `).join('');
+        
+      } catch (error) {
+        console.error("Error loading leaderboard:", error);
+        leaderboard.innerHTML = '<div class="error-state">Failed to load leaderboard</div>';
+      }
+    }
+
+    // Setup lazy loading
+    function setupLazyLoading() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            img.src = img.dataset.src;
+            observer.unobserve(img);
+          }
+        });
+      }, { rootMargin: '100px' });
+
+      document.querySelectorAll('img[data-src]').forEach(img => {
+        observer.observe(img);
+      });
+    }
+
+    // Setup infinite scroll
+    function setupInfiniteScroll() {
+      window.addEventListener('scroll', () => {
+        const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+        
+        if (scrollTop + clientHeight >= scrollHeight - 500 && !isLoading && hasMoreMemes) {
+          loadMemes(currentFilter, searchInput.value.trim(), true);
+        }
+      });
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      setupInfiniteScroll();
+      loadMemes();
+      
+      // Tab buttons
+      tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          tabButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentFilter = btn.dataset.filter;
+          loadMemes(currentFilter, searchInput.value.trim());
+        });
+      });
+      
+      // Search button
+      searchBtn.addEventListener('click', () => {
+        loadMemes(currentFilter, searchInput.value.trim());
+      });
+      
+      // Search input
+      searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          loadMemes(currentFilter, searchInput.value.trim());
+        }
+      });
+    });
+  </script>
+</body>
 </html>

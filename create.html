@@ -19,28 +19,34 @@
     <div class="app-container">
       <!-- Sidebar -->
       <div class="sidebar">
-        <div class="logo">
-          <i class="fas fa-fire"></i>
-          <span>MemeHQ</span>
-        </div>
-        <nav class="nav-menu">
-          <a href="index.html" class="nav-item">
-            <i class="fas fa-home"></i>
-            <span>Dashboard</span>
-          </a>
-          <a href="create.html" class="nav-item active">
-            <i class="fas fa-plus-circle"></i>
-            <span>Create Meme</span>
-          </a>
-        </nav>
-        <div class="user-profile">
-          <img src="https://placehold.co/40" alt="User" id="userAvatar" />
-          <div class="user-info">
-            <span id="userName">Guest</span>
-            <button id="logoutBtn" style="display: none">Logout</button>
-          </div>
-        </div>
-      </div>
+  <div class="logo">
+    <i class="fas fa-fire"></i>
+    <span>MemeHQ</span>
+  </div>
+  <nav class="nav-menu">
+    <a href="index.html" class="nav-item">
+      <i class="fas fa-home"></i>
+      <span>Dashboard</span>
+    </a>
+    <a href="create.html" class="nav-item auth-required">
+      <i class="fas fa-plus-circle"></i>
+      <span>Create Meme</span>
+    </a>
+    <a href="analytics.html" class="nav-item auth-required">
+      <i class="fas fa-chart-line"></i>
+      <span>Analytics</span>
+    </a>
+    <a href="leaderboard.html" class="nav-item">
+      <i class="fas fa-trophy"></i>
+      <span>Leaderboard</span>
+    </a>
+    <a href="badges.html" class="nav-item auth-required">
+      <i class="fas fa-medal"></i>
+      <span>My Badges</span>
+    </a>
+  </nav>
+  <!-- User profile remains same -->
+</div>
 
       <!-- Main Content -->
       <div class="main-content">
@@ -85,6 +91,16 @@
                 Load Image
               </button>
             </div>
+
+            <div class="panel-section">
+            <h3><i class="fas fa-robot"></i> AI Suggestions</h3>
+            <button id="aiCaptionBtn" class="btn btn-secondary">
+              <i class="fas fa-magic"></i> Generate Caption
+            </button>
+            <div class="ai-suggestions" id="aiSuggestions">
+              <!-- Suggestions will appear here -->
+            </div>
+          </div>
           </div>
 
           <!-- Center Panel - Canvas -->
@@ -226,6 +242,39 @@
           name: "Batman Slapping Robin",
           url: "https://i.imgflip.com/9ehk.jpg",
         },
+       
+
+        {
+          id: 5,
+          name: "Expanding Brain",
+          url: "https://i.imgflip.com/1jwhww.jpg"
+        },
+        {
+          id: 6,
+          name: "Disaster Girl",
+          url: "https://i.imgflip.com/9vct.jpg"
+        },
+        {
+          id: 7,
+          name: "Woman Yelling at Cat",
+          url: "https://i.imgflip.com/2hgfw.jpg"
+        },
+        {
+          id: 8,
+          name: "Change My Mind",
+          url: "https://i.imgflip.com/24y43o.jpg"
+        },
+        {
+          id: 9,
+          name: "Drake Hotline Bling",
+          url: "https://i.imgflip.com/30b1gx.jpg"
+        },
+        {
+          id: 10,
+          name: "Two Buttons",
+          url: "https://i.imgflip.com/1bgw.jpg"
+        }
+
       ];
 
       // Meme editor state
@@ -621,6 +670,68 @@
           handleImageUpload(e.dataTransfer.files[0]);
         }
       });
+
+
+      // AI Suggestion functionality
+const aiCaptionBtn = document.getElementById('aiCaptionBtn');
+const aiSuggestions = document.getElementById('aiSuggestions');
+
+aiCaptionBtn.addEventListener('click', async () => {
+  if (!state.canvasImage) {
+    showToast('Please select an image first', 'error');
+    return;
+  }
+
+  try {
+    showLoading(aiCaptionBtn);
+    aiSuggestions.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-spin"></i> Generating suggestions...</div>';
+
+    // In a real app, you would call your AI API here
+    // This is mock data for demonstration
+    const mockSuggestions = [
+      "When you finally understand the assignment",
+      "Me trying to adult",
+      "That moment when...",
+      "Wait, what?",
+      "I should not be this excited"
+    ];
+
+    // Display suggestions
+    aiSuggestions.innerHTML = mockSuggestions.map(text => `
+      <div class="ai-suggestion" data-text="${text}">
+        ${text}
+      </div>
+    `).join('');
+
+    // Add click handlers
+    document.querySelectorAll('.ai-suggestion').forEach(el => {
+      el.addEventListener('click', () => {
+        textContent.value = el.dataset.text;
+      });
+    });
+
+  } catch (error) {
+    showToast('Failed to generate suggestions', 'error');
+    console.error('AI error:', error);
+  } finally {
+    hideLoading(aiCaptionBtn);
+  }
+});
+
+// When saving a meme in create.js
+const tags = extractHashtags(memeData.title + ' ' + memeData.textElements.map(t => t.content).join(' '));
+
+const memeData = {
+  // ... other fields
+  tags: tags,
+  lowercaseTags: tags.map(t => t.toLowerCase())
+};
+
+function extractHashtags(text) {
+  const regex = /#(\w+)/g;
+  const matches = text.match(regex);
+  return matches ? [...new Set(matches.map(m => m.substring(1)))] : [];
+}
     </script>
   </body>
 </html>

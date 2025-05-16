@@ -72,3 +72,16 @@ export function logMemeData(meme) {
   }
   console.groupEnd();
 }
+
+// Add to your existing scripts/utils.js
+export function setActiveNavItem() {
+  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+  document.querySelectorAll('.nav-item').forEach(item => {
+    const itemHref = item.getAttribute('href');
+    if (itemHref === currentPage) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  });
+}

@@ -1,3 +1,4 @@
+/* Base Styles */
 :root {
   --primary: #6c5ce7;
   --primary-dark: #5649c0;
@@ -7,8 +8,20 @@
   --darker: #1e272e;
   --light: #f5f6fa;
   --gray: #636e72;
-  --danger: #d63031;
   --success: #00b894;
+  --warning: #fdcb6e;
+  --danger: #d63031;
+  --info: #0984e3;
+
+  --font-primary: 'Poppins', sans-serif;
+  --font-secondary: 'Comic Neue', cursive;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.1), 0 5px 10px rgba(0,0,0,0.05);
+  --shadow-xl: 0 20px 40px rgba(0,0,0,0.15), 0 10px 10px rgba(0,0,0,0.05);
+
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 * {
@@ -18,10 +31,35 @@
 }
 
 body {
-  font-family: "Poppins", sans-serif;
-  background-color: var(--dark);
+  font-family: var(--font-primary);
   color: var(--light);
+  background-color: var(--dark);
+  overflow-x: hidden;
   min-height: 100vh;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.text-gradient {
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline;
+}
+
+/* Layout */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  position: relative;
+  z-index: 2;
 }
 
 .app-container {
@@ -39,20 +77,155 @@ body {
   border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition);
+  border: 2px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+  margin-top: 20px;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.btn-outline:hover {
+  background-color: var(--primary);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-large {
+  padding: 12px 30px;
+  font-size: 1.1rem;
+}
+
+.btn-login {
+
+  margin-right: 10px;
+}
+
+.btn-signup {
+  background-color: var(--darker);
+  color: white;
+}
+
+.btn-signup:hover {
+  background-color: black;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+  background-color: var(--darker);
+  color: var(--light);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-danger {
+  background-color: var(--danger);
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  position: relative;
+}
+
 .logo {
   display: flex;
   align-items: center;
-  gap: 10px;
   font-size: 1.5rem;
   font-weight: 700;
-  margin-bottom: 30px;
   color: var(--light);
+  gap: 10px;
 }
 
 .logo i {
   color: var(--secondary);
 }
 
+.logo img {
+  height: 40px;
+  margin-right: 10px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 30px;
+}
+
+.nav-link {
+  color: var(--light);
+  text-decoration: none;
+  font-weight: 500;
+  position: relative;
+  transition: var(--transition);
+}
+
+.nav-link:hover {
+  color: var(--secondary);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--secondary);
+  transition: var(--transition);
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.mobile-menu-btn {
+  display: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--light);
+}
+
+/* Nav Menu */
 .nav-menu {
   display: flex;
   flex-direction: column;
@@ -68,7 +241,7 @@ body {
   border-radius: 8px;
   color: var(--light);
   text-decoration: none;
-  transition: all 0.3s;
+  transition: var(--transition);
 }
 
 .nav-item i {
@@ -85,6 +258,7 @@ body {
   color: white;
 }
 
+/* User Profile */
 .user-profile {
   margin-top: auto;
   display: flex;
@@ -161,44 +335,188 @@ body {
   color: var(--gray);
 }
 
-/* Buttons */
-.btn {
-  padding: 10px 20px;
-  border-radius: 5px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-  display: inline-flex;
+/* Hero Section */
+.hero {
+  display: flex;
   align-items: center;
-  gap: 8px;
+  min-height: calc(100vh - 80px);
+  padding: 50px 0;
 }
 
-.btn-primary {
-  background-color: var(--primary);
+.hero-content {
+  flex: 1;
+  padding-right: 50px;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  color: var(--gray);
+  margin-bottom: 30px;
+  max-width: 500px;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 20px;
+}
+
+.hero-image {
+  flex: 1;
+  position: relative;
+}
+
+/* Meme Card */
+.meme-card {
+  background: var(--darker);
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+  transition: var(--transition);
+  position: relative;
+}
+
+.meme-card img {
+  width: 100%;
+  display: block;
+}
+
+.meme-stats {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px;
+  background: var(--darker);
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+
+.meme-stats i {
+  margin-right: 5px;
+}
+
+.liked {
+  color: var(--secondary);
+}
+
+/* Features Section */
+.features {
+  padding: 100px 0;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.feature-card {
+  background: var(--darker);
+  border-radius: 15px;
+  padding: 30px;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition);
+}
+
+.feature-card:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--shadow-lg);
+}
+
+.feature-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
 }
 
-.btn-primary:hover {
-  background-color: var(--primary-dark);
+.feature-card h3 {
+  margin-bottom: 15px;
+  font-size: 1.5rem;
 }
 
-.btn-secondary {
-  background-color: var(--darker);
-  color: var(--light);
+.feature-card p {
+  color: var(--gray);
+  line-height: 1.6;
 }
 
-.btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+/* Animations */
+.floating {
+  animation: floating 3s ease-in-out infinite;
 }
 
-.btn-danger {
-  background-color: var(--danger);
-  color: white;
+@keyframes floating {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
 }
 
-.btn-danger:hover {
-  background-color: #c0392b;
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.7); }
+  70% { box-shadow: 0 0 0 15px rgba(108, 92, 231, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(108, 92, 231, 0); }
+}
+
+/* Animated Background */
+.floating-memes {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.meme-float {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  opacity: 0.1;
+  animation: float linear infinite;
+  animation-duration: var(--duration);
+  animation-delay: var(--delay);
+  top: var(--start);
+}
+
+.meme-float img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@keyframes float {
+  0% {
+    transform: translateX(-10%) translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateX(10%) translateY(-50px) rotate(5deg);
+  }
+  100% {
+    transform: translateX(-10%) translateY(-100vh) rotate(0deg);
+  }
 }
 
 /* Loader */
@@ -285,22 +603,7 @@ body {
   margin-bottom: 20px;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .app-container {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    display: none;
-  }
-}
-
-/* Add these to your existing main.css */
-.liked {
-  color: var(--secondary);
-}
-
+/* Meme Editor Elements */
 .text-element {
   position: absolute;
   color: white;
@@ -382,4 +685,79 @@ body {
 
 [data-tooltip]:hover::after {
   opacity: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .hero-content {
+    padding-right: 0;
+    margin-bottom: 50px;
+  }
+
+  .hero-cta {
+    justify-content: center;
+  }
+
+  .hero-title {
+    font-size: 2.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .nav-links, .auth-buttons {
+    display: none;
+  }
+
+  .mobile-menu-btn {
+    display: block;
+  }
+
+  .hero-title {
+    font-size: 2.2rem;
+  }
+
+  .hero-cta {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .meme-card {
+    max-width: 350px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-title {
+    font-size: 1.8rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .search-bar {
+    width: 100%;
+  }
 }

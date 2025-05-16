@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MemeHQ - Analytics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/analytics.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar same as other pages -->
+    <div class="sidebar">
+  <div class="logo">
+    <i class="fas fa-fire"></i>
+    <span>MemeHQ</span>
+  </div>
+  <nav class="nav-menu">
+    <a href="index.html" class="nav-item">
+      <i class="fas fa-home"></i>
+      <span>Dashboard</span>
+    </a>
+    <a href="create.html" class="nav-item auth-required">
+      <i class="fas fa-plus-circle"></i>
+      <span>Create Meme</span>
+    </a>
+    <a href="analytics.html" class="nav-item auth-required">
+      <i class="fas fa-chart-line"></i>
+      <span>Analytics</span>
+    </a>
+    <a href="leaderboard.html" class="nav-item">
+      <i class="fas fa-trophy"></i>
+      <span>Leaderboard</span>
+    </a>
+    <a href="badges.html" class="nav-item auth-required">
+      <i class="fas fa-medal"></i>
+      <span>My Badges</span>
+    </a>
+  </nav>
+  <!-- User profile remains same -->
+</div>
+    <div class="main-content">
+      <header class="top-bar">
+        <h1>Meme Analytics</h1>
+        <div class="time-filters">
+          <button class="filter-btn active" data-period="24h">24 Hours</button>
+          <button class="filter-btn" data-period="7d">7 Days</button>
+          <button class="filter-btn" data-period="30d">30 Days</button>
+          <button class="filter-btn" data-period="all">All Time</button>
+        </div>
+      </header>
+
+      <div class="analytics-content">
+        <div class="analytics-grid">
+          <!-- Meme Performance Card -->
+          <div class="analytics-card performance-card">
+            <h2><i class="fas fa-chart-line"></i> Performance Overview</h2>
+            <div class="chart-container">
+              <canvas id="performanceChart"></canvas>
+            </div>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-value" id="totalViews">0</div>
+                <div class="stat-label">Total Views</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="totalLikes">0</div>
+                <div class="stat-label">Total Likes</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="engagementRate">0%</div>
+                <div class="stat-label">Engagement Rate</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="viralScore">0</div>
+                <div class="stat-label">Viral Score</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Memes Card -->
+          <div class="analytics-card top-memes-card">
+            <h2><i class="fas fa-trophy"></i> Your Top Memes</h2>
+            <div class="meme-list" id="topMemesList">
+              <!-- Filled by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Audience Insights Card -->
+          <div class="analytics-card audience-card">
+            <h2><i class="fas fa-users"></i> Audience Insights</h2>
+            <div class="chart-container">
+              <canvas id="audienceChart"></canvas>
+            </div>
+            <div class="insights">
+              <div class="insight-item">
+                <i class="fas fa-clock"></i>
+                <span>Peak engagement: <strong id="peakTime">6-9 PM</strong></span>
+              </div>
+              <div class="insight-item">
+                <i class="fas fa-tags"></i>
+                <span>Top tag: <strong id="topTag">#funny</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Badges Card -->
+          <div class="analytics-card badges-card">
+            <h2><i class="fas fa-medal"></i> Your Badges</h2>
+            <div class="badges-grid" id="badgesGrid">
+              <!-- Filled by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from "./scripts/firebase.js";
+    import { collection, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { initAuth, handleLogout } from "./scripts/auth.js";
+    import { showToast } from "./scripts/utils.js";
+
+    // Initialize auth
+    initAuth();
+
+    // DOM elements
+    const performanceChartCtx = document.getElementById('performanceChart').getContext('2d');
+    const audienceChartCtx = document.getElementById('audienceChart').getContext('2d');
+    const topMemesList = document.getElementById('topMemesList');
+    const badgesGrid = document.getElementById('badgesGrid');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+
+    // Chart instances
+    let performanceChart, audienceChart;
+
+    // Load analytics data
+    async function loadAnalytics(period = '24h') {
+      if (!auth.currentUser) return;
+
+      try {
+        // In a real app, you would fetch actual analytics data from Firestore
+        // This is mock data for demonstration
+        
+        // Performance data
+        const performanceData = generateMockPerformanceData(period);
+        updatePerformanceChart(performanceData);
+        
+        // Top memes
+        const topMemes = await getUserTopMemes(auth.currentUser.uid, period);
+        displayTopMemes(topMemes);
+        
+        // Audience data
+        const audienceData = generateMockAudienceData();
+        updateAudienceChart(audienceData);
+        
+        // Badges
+        const badges = generateMockBadges();
+        displayBadges(badges);
+        
+        // Update stats
+        updateStats(performanceData, topMemes);
+
+      } catch (error) {
+        showToast(`Error loading analytics: ${error.message}`, 'error');
+        console.error('Analytics error:', error);
+      }
+    }
+
+    // Helper functions would go here...
+    // (I'll provide the full implementation in the next steps)
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAnalytics();
+      
+      // Filter buttons
+      filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          filterButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          loadAnalytics(btn.dataset.period);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
