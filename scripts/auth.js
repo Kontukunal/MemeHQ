@@ -1,18 +1,45 @@
-import { auth } from "./firebase.js";
+import { auth, db } from "./firebase.js";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  doc,
+  setDoc,
+  serverTimestamp,
+  getDoc,
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { showToast } from "./utils.js";
 
+async function ensureUserDocumentExists(user) {
+  const userRef = doc(db, "users", user.uid);
+  const userSnap = await getDoc(userRef);
+
+  if (!userSnap.exists()) {
+    await setDoc(userRef, {
+      uid: user.uid,
+      email: user.email,
+      username: user.email.split("@")[0],
+      memeCount: 0,
+      totalLikes: 0,
+      createdAt: serverTimestamp(),
+      lastActive: serverTimestamp(),
+      photoURL: user.photoURL || null,
+      badges: [],
+    });
+  }
+}
+
 export function initAuth() {
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     const protectedPages = ["index.html", "create.html"];
     const currentPage = window.location.pathname.split("/").pop();
 
     if (user) {
+      await ensureUserDocumentExists(user);
+
       if (currentPage === "login.html") {
         window.location.href = "index.html";
       }
@@ -57,7 +84,24 @@ function updateUserUI(user) {
 
 export async function handleLogin(email, password) {
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    const user = userCredential.user;
+
+    // Update user document
+    const userRef = doc(db, "users", user.uid);
+    await setDoc(
+      userRef,
+      {
+        lastActive: serverTimestamp(),
+        photoURL: user.photoURL || null,
+      },
+      { merge: true }
+    );
+
     showToast("Login successful!", "success");
     return { success: true };
   } catch (error) {
@@ -79,7 +123,27 @@ export async function handleLogin(email, password) {
 
 export async function handleSignup(email, password) {
   try {
-    await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    const user = userCredential.user;
+
+    // Create user document
+    const userRef = doc(db, "users", user.uid);
+    await setDoc(userRef, {
+      uid: user.uid,
+      email: user.email,
+      username: user.email.split("@")[0],
+      memeCount: 0,
+      totalLikes: 0,
+      createdAt: serverTimestamp(),
+      lastActive: serverTimestamp(),
+      photoURL: null,
+      badges: [],
+    });
+
     showToast("Account created successfully!", "success");
     return { success: true };
   } catch (error) {

@@ -1,7 +1,13 @@
+// firebase.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getStorage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+import {
+  getFirestore,
+  enableIndexedDbPersistence,
+  initializeFirestore,
+  memoryLocalCache,
+  persistentLocalCache,
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA1U2njOXHOiah16fWS9MKWmMhF0aoa7Ao",
@@ -13,9 +19,24 @@ const firebaseConfig = {
   measurementId: "G-027L0X2XJE",
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
 
-export { auth, db, storage };
+// Initialize Firestore with the new persistence API (recommended approach)
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache(),
+});
+
+// Legacy approach (will be deprecated)
+// const db = getFirestore(app);
+// enableIndexedDbPersistence(db).catch((err) => {
+//   if (err.code == "failed-precondition") {
+//     console.log("Offline persistence already enabled in another tab");
+//   } else if (err.code == "unimplemented") {
+//     console.log("Browser doesn't support offline persistence");
+//   }
+// });
+
+// Export both auth and db
+export { auth, db };

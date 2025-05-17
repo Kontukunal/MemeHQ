@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MemeHQ - Create Meme</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Comic+Neue:wght@700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Impact&display=swap"
       rel="stylesheet"
     />
     <link
@@ -19,34 +19,47 @@
     <div class="app-container">
       <!-- Sidebar -->
       <div class="sidebar">
-  <div class="logo">
-    <i class="fas fa-fire"></i>
-    <span>MemeHQ</span>
-  </div>
-  <nav class="nav-menu">
-    <a href="index.html" class="nav-item">
-      <i class="fas fa-home"></i>
-      <span>Dashboard</span>
-    </a>
-    <a href="create.html" class="nav-item auth-required">
-      <i class="fas fa-plus-circle"></i>
-      <span>Create Meme</span>
-    </a>
-    <a href="analytics.html" class="nav-item auth-required">
-      <i class="fas fa-chart-line"></i>
-      <span>Analytics</span>
-    </a>
-    <a href="leaderboard.html" class="nav-item">
-      <i class="fas fa-trophy"></i>
-      <span>Leaderboard</span>
-    </a>
-    <a href="badges.html" class="nav-item auth-required">
-      <i class="fas fa-medal"></i>
-      <span>My Badges</span>
-    </a>
-  </nav>
-  <!-- User profile remains same -->
-</div>
+        <div class="logo">
+          <i class="fas fa-fire"></i>
+          <span>MemeHQ</span>
+        </div>
+        <nav class="nav-menu">
+          <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+          </a>
+          <a href="create.html" class="nav-item active auth-required">
+            <i class="fas fa-plus-circle"></i>
+            <span>Create Meme</span>
+          </a>
+          <a href="analytics.html" class="nav-item auth-required">
+            <i class="fas fa-chart-line"></i>
+            <span>Analytics</span>
+          </a>
+          <a href="leaderboard.html" class="nav-item">
+            <i class="fas fa-trophy"></i>
+            <span>Leaderboard</span>
+          </a>
+          <a href="badges.html" class="nav-item auth-required">
+            <i class="fas fa-medal"></i>
+            <span>My Badges</span>
+          </a>
+        </nav>
+        <div class="user-profile">
+          <img
+            src="https://ui-avatars.com/api/?name=U"
+            alt="User"
+            id="userAvatar"
+            class="user-avatar"
+          />
+          <div class="user-info">
+            <span id="userName">Guest</span>
+            <button id="logoutBtn" class="logout-btn">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+          </div>
+        </div>
+      </div>
 
       <!-- Main Content -->
       <div class="main-content">
@@ -63,19 +76,7 @@
             <div class="panel-section">
               <h3><i class="fas fa-images"></i> Templates</h3>
               <div class="template-grid" id="templateGrid">
-                <!-- Templates will be loaded here -->
-              </div>
-            </div>
-
-            <div class="panel-section">
-              <h3><i class="fas fa-upload"></i> Upload Image</h3>
-              <div class="upload-area" id="uploadArea">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <p>Drag & drop your image here</p>
-                <input type="file" id="imageUpload" accept="image/*" />
-                <label for="imageUpload" class="btn btn-secondary"
-                  >Select File</label
-                >
+                <!-- Templates loaded via JS -->
               </div>
             </div>
 
@@ -93,14 +94,14 @@
             </div>
 
             <div class="panel-section">
-            <h3><i class="fas fa-robot"></i> AI Suggestions</h3>
-            <button id="aiCaptionBtn" class="btn btn-secondary">
-              <i class="fas fa-magic"></i> Generate Caption
-            </button>
-            <div class="ai-suggestions" id="aiSuggestions">
-              <!-- Suggestions will appear here -->
+              <h3><i class="fas fa-robot"></i> AI Suggestions</h3>
+              <button id="aiCaptionBtn" class="btn btn-secondary">
+                <i class="fas fa-magic"></i> Generate Caption
+              </button>
+              <div class="ai-suggestions" id="aiSuggestions">
+                <!-- Suggestions will appear here -->
+              </div>
             </div>
-          </div>
           </div>
 
           <!-- Center Panel - Canvas -->
@@ -110,7 +111,6 @@
                 <i class="fas fa-spinner fa-spin"></i> Loading...
               </div>
               <canvas id="memeCanvas"></canvas>
-              <!-- Position indicators -->
               <div class="position-indicator top"></div>
               <div class="position-indicator middle"></div>
               <div class="position-indicator bottom"></div>
@@ -196,6 +196,15 @@
                 </div>
               </div>
 
+              <div class="form-group">
+                <label>Tags (comma separated)</label>
+                <input
+                  type="text"
+                  id="memeTags"
+                  placeholder="funny, relatable, dank"
+                />
+              </div>
+
               <button class="btn btn-primary" id="addTextBtn">
                 <i class="fas fa-plus"></i> Add Text
               </button>
@@ -213,9 +222,9 @@
     <script type="module">
       import { auth } from "./scripts/firebase.js";
       import { saveMeme } from "./scripts/database.js";
-      import { uploadMemeImage } from "./scripts/storage.js";
       import { showToast, showLoading, hideLoading } from "./scripts/utils.js";
       import { initAuth, handleLogout } from "./scripts/auth.js";
+      import { checkAndAwardBadge } from "./scripts/badges.js";
 
       // Initialize auth
       initAuth();
@@ -232,49 +241,28 @@
           name: "Drake Hotline Bling",
           url: "https://i.imgflip.com/1g8my.jpg",
         },
-        {
-          id: 3,
-          name: "Two Buttons",
-          url: "https://i.imgflip.com/1bgw.jpg",
-        },
+        { id: 3, name: "Two Buttons", url: "https://i.imgflip.com/1bgw.jpg" },
         {
           id: 4,
           name: "Batman Slapping Robin",
           url: "https://i.imgflip.com/9ehk.jpg",
         },
-       
-
         {
           id: 5,
           name: "Expanding Brain",
-          url: "https://i.imgflip.com/1jwhww.jpg"
+          url: "https://i.imgflip.com/1jwhww.jpg",
         },
-        {
-          id: 6,
-          name: "Disaster Girl",
-          url: "https://i.imgflip.com/9vct.jpg"
-        },
+        { id: 6, name: "Disaster Girl", url: "https://i.imgflip.com/9vct.jpg" },
         {
           id: 7,
           name: "Woman Yelling at Cat",
-          url: "https://i.imgflip.com/2hgfw.jpg"
+          url: "https://i.imgflip.com/2hgfw.jpg",
         },
         {
           id: 8,
           name: "Change My Mind",
-          url: "https://i.imgflip.com/24y43o.jpg"
+          url: "https://i.imgflip.com/24y43o.jpg",
         },
-        {
-          id: 9,
-          name: "Drake Hotline Bling",
-          url: "https://i.imgflip.com/30b1gx.jpg"
-        },
-        {
-          id: 10,
-          name: "Two Buttons",
-          url: "https://i.imgflip.com/1bgw.jpg"
-        }
-
       ];
 
       // Meme editor state
@@ -303,12 +291,13 @@
       const addTextBtn = document.getElementById("addTextBtn");
       const deleteTextBtn = document.getElementById("deleteTextBtn");
       const publishBtn = document.getElementById("publishBtn");
-      const imageUpload = document.getElementById("imageUpload");
-      const uploadArea = document.getElementById("uploadArea");
-      const logoutBtn = document.getElementById("logoutBtn");
-      const positionButtons = document.querySelectorAll(".btn-text-option");
       const imageUrlInput = document.getElementById("imageUrlInput");
       const loadImageUrlBtn = document.getElementById("loadImageUrlBtn");
+      const memeTags = document.getElementById("memeTags");
+      const logoutBtn = document.getElementById("logoutBtn");
+      const positionButtons = document.querySelectorAll(".btn-text-option");
+      const aiCaptionBtn = document.getElementById("aiCaptionBtn");
+      const aiSuggestions = document.getElementById("aiSuggestions");
 
       // Set up logout button
       if (logoutBtn) {
@@ -375,7 +364,7 @@
       }
 
       // Draw text on canvas
-      function drawText(text) {
+      function drawText() {
         if (!ctx || !state.canvasImage) return;
 
         const img = new Image();
@@ -406,10 +395,7 @@
       // Add text element
       function addTextElement() {
         if (!state.canvasImage) {
-          showToast(
-            "Please select a template or upload an image first",
-            "error"
-          );
+          showToast("Please select a template first", "error");
           return;
         }
 
@@ -439,7 +425,7 @@
         };
 
         state.textElements.push(textObj);
-        drawText(textObj);
+        drawText();
         state.activeTextElement = textObj;
       }
 
@@ -450,42 +436,6 @@
           drawText();
           state.activeTextElement = null;
         }
-      }
-
-      // Handle image upload
-      function handleImageUpload(file) {
-        if (!file.type.match("image.*")) {
-          showToast("Please select an image file", "error");
-          return;
-        }
-
-        showLoader(true);
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const img = new Image();
-          img.onload = () => {
-            state.canvasWidth = img.width;
-            state.canvasHeight = img.height;
-            memeCanvas.width = img.width;
-            memeCanvas.height = img.height;
-            ctx.drawImage(img, 0, 0, img.width, img.height);
-            state.canvasImage = file; // Store the file object for later upload
-            state.textElements = [];
-            state.activeTextElement = null;
-            showLoader(false);
-          };
-          img.onerror = () => {
-            showLoader(false);
-            showToast("Error loading image", "error");
-          };
-          img.src = e.target.result;
-        };
-        reader.onerror = () => {
-          showLoader(false);
-          showToast("Error reading image file", "error");
-        };
-        reader.readAsDataURL(file);
       }
 
       // Handle image URL load
@@ -504,6 +454,13 @@
         }
       }
 
+      // Extract hashtags from text
+      function extractHashtags(text) {
+        const regex = /#(\w+)/g;
+        const matches = text.match(regex);
+        return matches ? [...new Set(matches.map((m) => m.substring(1)))] : [];
+      }
+
       // Publish meme
       async function publishMeme() {
         if (!auth.currentUser) {
@@ -513,7 +470,7 @@
         }
 
         if (!state.canvasImage) {
-          showToast("Please select a template or upload an image", "error");
+          showToast("Please select a template first", "error");
           return;
         }
 
@@ -525,6 +482,7 @@
           const title =
             prompt("Enter a title for your meme:", "My Awesome Meme") ||
             "Untitled Meme";
+          const tags = extractHashtags(memeTags.value);
 
           // Validate text elements
           const validTextElements = state.textElements
@@ -541,29 +499,28 @@
               },
             }));
 
-          // First upload image if it's a file
-          let imageUrl;
-          if (state.canvasImage instanceof File) {
-            imageUrl = await uploadMemeImage(state.canvasImage, user.uid);
-          } else {
-            imageUrl = state.canvasImage; // Use template URL directly
-          }
-
           // Prepare meme data
           const memeData = {
             title,
             userId: user.uid,
-            userName: user.email,
-            imageUrl,
+            userName: user.email.split("@")[0],
+            imageUrl: state.canvasImage,
             textElements: validTextElements,
-            createdAt: new Date().toISOString(),
+            tags,
+            lowercaseTags: tags.map((t) => t.toLowerCase()),
             likes: 0,
             views: 0,
             likedBy: [],
+            dislikedBy: [],
+            commentCount: 0,
+            reports: 0,
           };
 
           // Save to Firestore
-          await saveMeme(memeData);
+          const memeId = await saveMeme(memeData);
+
+          // Check for badges
+          await checkAndAwardBadge(user.uid, "FIRST_MEME");
 
           showToast("Meme published successfully!", "success");
           setTimeout(() => {
@@ -576,6 +533,52 @@
           hideLoading(publishBtn, originalBtnHTML);
         }
       }
+
+      // AI Suggestion functionality
+      aiCaptionBtn.addEventListener("click", async () => {
+        if (!state.canvasImage) {
+          showToast("Please select an image first", "error");
+          return;
+        }
+
+        try {
+          showLoading(aiCaptionBtn);
+          aiSuggestions.innerHTML =
+            '<div class="loader"><i class="fas fa-spinner fa-spin"></i> Generating suggestions...</div>';
+
+          // Mock AI suggestions
+          const mockSuggestions = [
+            "When you finally understand the assignment",
+            "Me trying to adult",
+            "That moment when...",
+            "Wait, what?",
+            "I should not be this excited",
+          ];
+
+          // Display suggestions
+          aiSuggestions.innerHTML = mockSuggestions
+            .map(
+              (text) => `
+            <div class="ai-suggestion" data-text="${text}">
+              ${text}
+            </div>
+          `
+            )
+            .join("");
+
+          // Add click handlers
+          document.querySelectorAll(".ai-suggestion").forEach((el) => {
+            el.addEventListener("click", () => {
+              textContent.value = el.dataset.text;
+            });
+          });
+        } catch (error) {
+          showToast("Failed to generate suggestions", "error");
+          console.error("AI error:", error);
+        } finally {
+          hideLoading(aiCaptionBtn);
+        }
+      });
 
       // Initialize the app
       document.addEventListener("DOMContentLoaded", () => {
@@ -647,91 +650,6 @@
       deleteTextBtn.addEventListener("click", deleteSelectedText);
       publishBtn.addEventListener("click", publishMeme);
       loadImageUrlBtn.addEventListener("click", handleImageUrlLoad);
-
-      imageUpload.addEventListener("change", (e) => {
-        if (e.target.files[0]) {
-          handleImageUpload(e.target.files[0]);
-        }
-      });
-
-      uploadArea.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        uploadArea.style.borderColor = "var(--accent)";
-      });
-
-      uploadArea.addEventListener("dragleave", () => {
-        uploadArea.style.borderColor = "var(--gray)";
-      });
-
-      uploadArea.addEventListener("drop", (e) => {
-        e.preventDefault();
-        uploadArea.style.borderColor = "var(--gray)";
-        if (e.dataTransfer.files[0]) {
-          handleImageUpload(e.dataTransfer.files[0]);
-        }
-      });
-
-
-      // AI Suggestion functionality
-const aiCaptionBtn = document.getElementById('aiCaptionBtn');
-const aiSuggestions = document.getElementById('aiSuggestions');
-
-aiCaptionBtn.addEventListener('click', async () => {
-  if (!state.canvasImage) {
-    showToast('Please select an image first', 'error');
-    return;
-  }
-
-  try {
-    showLoading(aiCaptionBtn);
-    aiSuggestions.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-spin"></i> Generating suggestions...</div>';
-
-    // In a real app, you would call your AI API here
-    // This is mock data for demonstration
-    const mockSuggestions = [
-      "When you finally understand the assignment",
-      "Me trying to adult",
-      "That moment when...",
-      "Wait, what?",
-      "I should not be this excited"
-    ];
-
-    // Display suggestions
-    aiSuggestions.innerHTML = mockSuggestions.map(text => `
-      <div class="ai-suggestion" data-text="${text}">
-        ${text}
-      </div>
-    `).join('');
-
-    // Add click handlers
-    document.querySelectorAll('.ai-suggestion').forEach(el => {
-      el.addEventListener('click', () => {
-        textContent.value = el.dataset.text;
-      });
-    });
-
-  } catch (error) {
-    showToast('Failed to generate suggestions', 'error');
-    console.error('AI error:', error);
-  } finally {
-    hideLoading(aiCaptionBtn);
-  }
-});
-
-// When saving a meme in create.js
-const tags = extractHashtags(memeData.title + ' ' + memeData.textElements.map(t => t.content).join(' '));
-
-const memeData = {
-  // ... other fields
-  tags: tags,
-  lowercaseTags: tags.map(t => t.toLowerCase())
-};
-
-function extractHashtags(text) {
-  const regex = /#(\w+)/g;
-  const matches = text.match(regex);
-  return matches ? [...new Set(matches.map(m => m.substring(1)))] : [];
-}
     </script>
   </body>
 </html>
