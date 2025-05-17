@@ -27,7 +27,6 @@ const auth = getAuth(app);
 const db = initializeFirestore(app, {
   localCache: persistentLocalCache(),
 });
-
 // Legacy approach (will be deprecated)
 // const db = getFirestore(app);
 // enableIndexedDbPersistence(db).catch((err) => {
@@ -40,3 +39,4 @@ const db = initializeFirestore(app, {
 
 // Export both auth and db
 export { auth, db };
+

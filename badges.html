@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MemeHQ - My Badges</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="styles/main.css" />
+    <style>
+      .badges-container {
+        padding: 2rem;
+      }
+
+      .badges-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .badges-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .stat-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .stat-card h3 {
+        font-size: 2rem;
+        margin: 0;
+        color: var(--primary-color);
+      }
+
+      .stat-card p {
+        margin: 0.5rem 0 0;
+        color: var(--text-secondary);
+      }
+
+      .badges-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .badge-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        transition: transform 0.2s;
+      }
+
+      .badge-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .badge-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin-bottom: 1rem;
+      }
+
+      .badge-card.locked {
+        opacity: 0.7;
+        filter: grayscale(1);
+      }
+
+      .badge-card.locked::after {
+        content: "🔒";
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.5rem;
+      }
+
+      .badge-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0.5rem 0;
+      }
+
+      .badge-description {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+      }
+
+      .badge-progress {
+        width: 100%;
+        height: 6px;
+        background: var(--bg-secondary);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: auto;
+      }
+
+      .progress-bar {
+        height: 100%;
+        background: var(--primary-color);
+        transition: width 0.3s ease;
+      }
+
+      /* Rarity colors */
+      .common { background: #7E7E7E; color: white; }
+      .rare { background: #4C97FF; color: white; }
+      .epic { background: #9C27B0; color: white; }
+      .legendary { background: #FFD700; color: black; }
+
+      /* Achievement popup */
+      .achievement-popup {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        animation: slideIn 0.3s ease-out;
+        z-index: 1000;
+      }
+
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+
+      .achievement-icon {
+        font-size: 2rem;
+      }
+
+      .achievement-details h3 {
+        margin: 0;
+        color: var(--primary-color);
+      }
+
+      .achievement-details p {
+        margin: 0.25rem 0 0;
+        color: var(--text-secondary);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="logo">
+          <i class="fas fa-fire"></i>
+          <span>MemeHQ</span>
+        </div>
+        <nav class="nav-menu">
+          <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+          </a>
+          <a href="create.html" class="nav-item auth-required">
+            <i class="fas fa-plus-circle"></i>
+            <span>Create Meme</span>
+          </a>
+          <a href="analytics.html" class="nav-item auth-required">
+            <i class="fas fa-chart-line"></i>
+            <span>Analytics</span>
+          </a>
+          <a href="leaderboard.html" class="nav-item">
+            <i class="fas fa-trophy"></i>
+            <span>Leaderboard</span>
+          </a>
+          <a href="badges.html" class="nav-item active auth-required">
+            <i class="fas fa-medal"></i>
+            <span>My Badges</span>
+          </a>
+        </nav>
+        
+        <!-- Theme Toggle -->
+        <button id="themeToggle" class="theme-toggle" title="Toggle theme">
+          <i class="fas fa-moon"></i>
+        </button>
+
+        <div class="user-profile">
+          <img
+            src="https://ui-avatars.com/api/?name=U"
+            alt="User"
+            id="userAvatar"
+            class="user-avatar"
+          />
+          <div class="user-info">
+            <span id="userName">Guest</span>
+            <button id="logoutBtn" class="logout-btn">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="badges-container">
+          <div class="badges-header">
+            <h1><i class="fas fa-medal"></i> My Badges</h1>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="badges-stats">
+            <div class="stat-card">
+              <h3 id="totalBadges">0</h3>
+              <p>Badges Earned</p>
+            </div>
+            <div class="stat-card">
+              <h3 id="rarity">0%</h3>
+              <p>Rarity Score</p>
+            </div>
+            <div class="stat-card">
+              <h3 id="rank">--</h3>
+              <p>Global Rank</p>
+            </div>
+          </div>
+
+          <!-- Badges Grid -->
+          <div class="badges-grid" id="badgesGrid">
+            <!-- Badges will be loaded here -->
+            <div class="loader">
+              <i class="fas fa-spinner fa-spin"></i> Loading badges...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { auth } from "./scripts/firebase.js";
+      import { initAuth, handleLogout } from "./scripts/auth.js";
+      import { showToast, showLoading, hideLoading } from "./scripts/utils.js";
+      import { getUserBadges, getAllBadges, getTotalUsers } from "./scripts/badges.js";
+
+      // Initialize auth
+      initAuth();
+
+      // DOM Elements
+      const badgesGrid = document.getElementById("badgesGrid");
+      const totalBadgesEl = document.getElementById("totalBadges");
+      const rarityEl = document.getElementById("rarity");
+      const rankEl = document.getElementById("rank");
+      const logoutBtn = document.getElementById("logoutBtn");
+
+      // Set up logout button
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", handleLogout);
+      }
+
+      // Show achievement popup
+      function showAchievement(badge) {
+        const popup = document.createElement("div");
+        popup.className = "achievement-popup";
+        popup.innerHTML = `
+          <div class="achievement-icon ${badge.rarity}">
+            <i class="${badge.icon}"></i>
+          </div>
+          <div class="achievement-details">
+            <h3>New Badge Unlocked!</h3>
+            <p>${badge.name}</p>
+          </div>
+        `;
+
+        document.body.appendChild(popup);
+        setTimeout(() => popup.remove(), 5000);
+      }
+
+      // Load badges data
+      async function loadBadgesData() {
+        if (!auth.currentUser) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        showLoading(badgesGrid);
+
+        try {
+          const [userBadges, allBadges, totalUsers] = await Promise.all([
+            getUserBadges(auth.currentUser.uid),
+            getAllBadges(),
+            getTotalUsers()
+          ]);
+
+          // Update stats
+          totalBadgesEl.textContent = userBadges.length;
+          
+          // Calculate rarity score (percentage of users with fewer badges)
+          const userScore = userBadges.reduce((score, badge) => {
+            const rarityScores = { common: 1, rare: 2, epic: 3, legendary: 4 };
+            return score + (rarityScores[badge.rarity] || 1);
+          }, 0);
+          
+          const rarityScore = Math.round((userScore / (totalUsers * 4)) * 100);
+          rarityEl.textContent = `${rarityScore}%`;
+
+          // Calculate rank (mock data - replace with actual ranking logic)
+          const rank = Math.max(1, Math.round(totalUsers * (1 - rarityScore / 100)));
+          rankEl.textContent = `#${rank}`;
+
+          // Display badges
+          badgesGrid.innerHTML = allBadges.map(badge => {
+            const userHasBadge = userBadges.some(b => b.id === badge.id);
+            const progress = userHasBadge ? 100 : 0; // Replace with actual progress
+
+            return `
+              <div class="badge-card ${!userHasBadge ? 'locked' : ''}">
+                <div class="badge-icon ${badge.rarity}">
+                  <i class="${badge.icon}"></i>
+                </div>
+                <h3 class="badge-name">${badge.name}</h3>
+                <p class="badge-description">${badge.description}</p>
+                <div class="badge-progress">
+                  <div class="progress-bar" style="width: ${progress}%"></div>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+        } catch (error) {
+          console.error('Error loading badges:', error);
+          showToast('Failed to load badges', 'error');
+        } finally {
+          hideLoading(badgesGrid);
+        }
+      }
+
+      // Initialize
+      document.addEventListener('DOMContentLoaded', loadBadgesData);
+    </script>
+  
+    <script type="module">
+      import { initTheme, toggleTheme } from './scripts/theme.js';
+      
+      // Initialize theme system
+      initTheme();
+      
+      // Set up theme toggle
+      const themeToggle = document.getElementById('themeToggle');
+      themeToggle.addEventListener('click', toggleTheme);
+    </script>
+
+  </body>
+</html> 

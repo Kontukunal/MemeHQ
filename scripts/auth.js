@@ -34,19 +34,43 @@ async function ensureUserDocumentExists(user) {
 
 export function initAuth() {
   onAuthStateChanged(auth, async (user) => {
-    const protectedPages = ["index.html", "create.html"];
-    const currentPage = window.location.pathname.split("/").pop();
+    const protectedPages = ["index.html", "create.html", "badges.html", "analytics.html", "profile.html"];
+    
+    // Get the full URL path and extract the page name
+    const fullPath = window.location.pathname;
+    const currentPage = fullPath.split("/").pop() || "index.html";
+    
+    console.log("Auth state check:", {
+      currentPage,
+      fullPath,
+      isLoggedIn: !!user,
+      isProtectedPage: protectedPages.includes(currentPage)
+    });
 
     if (user) {
-      await ensureUserDocumentExists(user);
+      try {
+        await ensureUserDocumentExists(user);
+        console.log("User document verified");
 
-      if (currentPage === "login.html") {
-        window.location.href = "index.html";
+        if (currentPage === "login.html") {
+          const redirectTo = sessionStorage.getItem("redirectTo") || "index.html";
+          console.log("Redirecting after login to:", redirectTo);
+          sessionStorage.removeItem("redirectTo");
+          window.location.replace(redirectTo);
+          return;
+        }
+
+        updateUserUI(user);
+      } catch (error) {
+        console.error("Error in auth initialization:", error);
+        showToast("Error initializing user data", "error");
       }
-      updateUserUI(user);
     } else {
       if (protectedPages.includes(currentPage)) {
-        window.location.href = "login.html";
+        console.log("Unauthorized access to protected page, redirecting to login");
+        sessionStorage.setItem("redirectTo", currentPage);
+        window.location.replace("login.html");
+        return;
       }
     }
   });

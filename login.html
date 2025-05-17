@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MemeHQ - Login</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link
@@ -98,7 +98,7 @@
           </div>
         </form>
 
-        <!-- <div id="authError" class="auth-error"></div> -->
+        <div id="authError" class="auth-error"></div>
       </div>
     </div>
 
@@ -121,14 +121,14 @@
         e.preventDefault();
         loginForm.style.display = "none";
         signupForm.style.display = "block";
-        authError.textContent = "";
+        if (authError) authError.textContent = "";
       });
 
       switchToLogin.addEventListener("click", (e) => {
         e.preventDefault();
         signupForm.style.display = "none";
         loginForm.style.display = "block";
-        authError.textContent = "";
+        if (authError) authError.textContent = "";
       });
 
       // Handle login
@@ -137,11 +137,16 @@
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
 
+        // Log the stored redirect URL before login
+        console.log("Redirect URL before login:", sessionStorage.getItem("redirectTo"));
+
         const result = await handleLogin(email, password);
         if (result.success) {
           showToast("Login successful!", "success");
+          // The redirection will be handled by initAuth
         } else {
-          authError.textContent = result.error;
+          if (authError) authError.textContent = result.error;
+          else showToast(result.error, "error");
         }
       });
 
@@ -150,21 +155,35 @@
         e.preventDefault();
         const email = document.getElementById("signupEmail").value;
         const password = document.getElementById("signupPassword").value;
-        const confirmPassword =
-          document.getElementById("confirmPassword").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
 
         if (password !== confirmPassword) {
-          authError.textContent = "Passwords do not match";
+          if (authError) authError.textContent = "Passwords do not match";
+          else showToast("Passwords do not match", "error");
           return;
         }
 
         const result = await handleSignup(email, password);
         if (result.success) {
           showToast("Account created successfully!", "success");
+          // The redirection will be handled by initAuth
         } else {
-          authError.textContent = result.error;
+          if (authError) authError.textContent = result.error;
+          else showToast(result.error, "error");
         }
       });
     </script>
+  
+    <script type="module">
+      import { initTheme, toggleTheme } from './scripts/theme.js';
+      
+      // Initialize theme system
+      initTheme();
+      
+      // Set up theme toggle
+      const themeToggle = document.getElementById('themeToggle');
+      themeToggle.addEventListener('click', toggleTheme);
+    </script>
+
   </body>
 </html>

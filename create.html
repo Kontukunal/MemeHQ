@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MemeHQ - Create Meme</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Impact&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Impact&display=swap"
       rel="stylesheet"
     />
     <link
@@ -45,6 +45,12 @@
             <span>My Badges</span>
           </a>
         </nav>
+        
+        <!-- Theme Toggle -->
+        <button id="themeToggle" class="theme-toggle" title="Toggle theme">
+          <i class="fas fa-moon"></i>
+        </button>
+        
         <div class="user-profile">
           <img
             src="https://ui-avatars.com/api/?name=U"
@@ -108,7 +114,7 @@
           <div class="canvas-panel">
             <div class="canvas-wrapper" id="canvasWrapper">
               <div class="loader" id="canvasLoader">
-                <i class="fas fa-spinner fa-spin"></i> Loading...
+                <!-- <i class="fas fa-spinner fa-spin"></i> Loading... -->
               </div>
               <canvas id="memeCanvas"></canvas>
               <div class="position-indicator top"></div>
@@ -225,9 +231,13 @@
       import { showToast, showLoading, hideLoading } from "./scripts/utils.js";
       import { initAuth, handleLogout } from "./scripts/auth.js";
       import { checkAndAwardBadge } from "./scripts/badges.js";
+      import { initTheme, toggleTheme } from './scripts/theme.js';
 
       // Initialize auth
       initAuth();
+
+      // Initialize theme system
+      initTheme();
 
       // Meme templates
       const MEME_TEMPLATES = [
@@ -298,6 +308,7 @@
       const positionButtons = document.querySelectorAll(".btn-text-option");
       const aiCaptionBtn = document.getElementById("aiCaptionBtn");
       const aiSuggestions = document.getElementById("aiSuggestions");
+      const themeToggle = document.getElementById('themeToggle');
 
       // Set up logout button
       if (logoutBtn) {
@@ -650,6 +661,9 @@
       deleteTextBtn.addEventListener("click", deleteSelectedText);
       publishBtn.addEventListener("click", publishMeme);
       loadImageUrlBtn.addEventListener("click", handleImageUrlLoad);
+
+      // Set up theme toggle
+      themeToggle.addEventListener('click', toggleTheme);
     </script>
   </body>
 </html>
