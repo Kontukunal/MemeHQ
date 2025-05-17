@@ -75,13 +75,36 @@ export function logMemeData(meme) {
 
 // Add to your existing scripts/utils.js
 export function setActiveNavItem() {
-  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-  document.querySelectorAll('.nav-item').forEach(item => {
-    const itemHref = item.getAttribute('href');
+  const currentPage = window.location.pathname.split("/").pop() || "index.html";
+  document.querySelectorAll(".nav-item").forEach((item) => {
+    const itemHref = item.getAttribute("href");
     if (itemHref === currentPage) {
-      item.classList.add('active');
+      item.classList.add("active");
     } else {
-      item.classList.remove('active');
+      item.classList.remove("active");
     }
   });
+}
+
+export function showLoader(show = true) {
+  const loader = document.getElementById("globalLoader");
+  if (loader) {
+    loader.style.display = show ? "flex" : "none";
+  }
+}
+
+export function showElementLoader(element, show = true, text = "Loading...") {
+  if (!element) return;
+
+  if (show) {
+    const loader = document.createElement("div");
+    loader.className = "loader";
+    loader.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${text}`;
+    element.appendChild(loader);
+  } else {
+    const loader = element.querySelector(".loader");
+    if (loader) {
+      loader.remove();
+    }
+  }
 }
