@@ -15,7 +15,10 @@ import {
   arrayRemove,
   serverTimestamp,
   writeBatch,
+  deleteDoc,
+  deleteField,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { auth } from "./firebase.js";
 
 export async function saveMeme(memeData) {
   try {
@@ -220,13 +223,229 @@ export async function searchMemesByTag(tag) {
   return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
 
-export async function getTopCreators(limitCount = 3) {
-  const q = query(
-    collection(db, "users"),
-    orderBy("totalLikes", "desc"),
-    limit(limitCount)
-  );
+export async function getTopCreators(period = "day") {
+  try {
+    const memesRef = collection(db, "memes");
 
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    // Get the timestamp for the start of the period
+    const now = new Date();
+    let startDate = new Date();
+    switch (period) {
+      case "day":
+        startDate.setDate(now.getDate() - 1);
+        break;
+      case "week":
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case "month":
+        startDate.setMonth(now.getMonth() - 1);
+        break;
+      case "all":
+        startDate = new Date(0); // Beginning of time
+        break;
+    }
+
+    // Get all memes in the time period
+    const memesQuery = query(
+      memesRef,
+      where("createdAt", ">=", startDate),
+      orderBy("createdAt", "desc")
+    );
+    const memesSnapshot = await getDocs(memesQuery);
+
+    // Calculate creator stats
+    const creatorStats = {};
+    memesSnapshot.forEach((doc) => {
+      const meme = doc.data();
+      const creatorId = meme.userId;
+      
+      if (!creatorStats[creatorId]) {
+        creatorStats[creatorId] = {
+          userId: creatorId,
+          userName: meme.userName,
+          photoURL: meme.userPhotoURL,
+          totalLikes: 0,
+          memeCount: 0
+        };
+      }
+      
+      creatorStats[creatorId].totalLikes += meme.likes;
+      creatorStats[creatorId].memeCount++;
+    });
+
+    // Convert to array and sort by total likes
+    const creators = Object.values(creatorStats)
+      .sort((a, b) => b.totalLikes - a.totalLikes)
+      .slice(0, 10); // Top 10 creators
+
+    return creators;
+  } catch (error) {
+    console.error("Error getting top creators:", error);
+    throw error;
+  }
+}
+
+export async function getTrendingMemes(period = "day") {
+  try {
+    const memesRef = collection(db, "memes");
+
+    // Get the timestamp for the start of the period
+    const now = new Date();
+    let startDate = new Date();
+    switch (period) {
+      case "day":
+        startDate.setDate(now.getDate() - 1);
+        break;
+      case "week":
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case "month":
+        startDate.setMonth(now.getMonth() - 1);
+        break;
+      case "all":
+        startDate = new Date(0); // Beginning of time
+        break;
+    }
+
+    // Query memes with engagement score (likes + views/10 + comments*2)
+    const memesQuery = query(
+      memesRef,
+      where("createdAt", ">=", startDate),
+      orderBy("createdAt", "desc")
+    );
+    const memesSnapshot = await getDocs(memesQuery);
+
+    const memes = [];
+    memesSnapshot.forEach((doc) => {
+      const meme = doc.data();
+      const engagementScore = 
+        meme.likes + 
+        Math.floor(meme.views / 10) + 
+        (meme.commentCount * 2);
+      
+      memes.push({
+        id: doc.id,
+        ...meme,
+        engagementScore
+      });
+    });
+
+    // Sort by engagement score and return top 12
+    return memes
+      .sort((a, b) => b.engagementScore - a.engagementScore)
+      .slice(0, 12);
+  } catch (error) {
+    console.error("Error getting trending memes:", error);
+    throw error;
+  }
+}
+
+export async function getTrendingTags(period = "day") {
+  try {
+    const memesRef = collection(db, "memes");
+
+    // Get the timestamp for the start of the period
+    const now = new Date();
+    let startDate = new Date();
+    switch (period) {
+      case "day":
+        startDate.setDate(now.getDate() - 1);
+        break;
+      case "week":
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case "month":
+        startDate.setMonth(now.getMonth() - 1);
+        break;
+      case "all":
+        startDate = new Date(0); // Beginning of time
+        break;
+    }
+
+    // Get memes in the time period
+    const memesQuery = query(
+      memesRef,
+      where("createdAt", ">=", startDate),
+      orderBy("createdAt", "desc")
+    );
+    const memesSnapshot = await getDocs(memesQuery);
+
+    // Count tag occurrences and calculate weights
+    const tagStats = {};
+    let maxCount = 0;
+
+    memesSnapshot.forEach((doc) => {
+      const meme = doc.data();
+      const tags = meme.tags || [];
+      
+      tags.forEach((tag) => {
+        if (!tagStats[tag]) {
+          tagStats[tag] = {
+            name: tag,
+            count: 0,
+            weight: 0
+          };
+        }
+        tagStats[tag].count++;
+        maxCount = Math.max(maxCount, tagStats[tag].count);
+      });
+    });
+
+    // Calculate weights (1.0 to 2.0 scale)
+    Object.values(tagStats).forEach((tag) => {
+      tag.weight = 1 + (tag.count / maxCount);
+    });
+
+    // Sort by count and return top 20
+    return Object.values(tagStats)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 20);
+  } catch (error) {
+    console.error("Error getting trending tags:", error);
+    throw error;
+  }
+}
+
+export async function deleteMeme(memeId) {
+  try {
+    // Verify user is logged in
+    if (!auth.currentUser) {
+      throw new Error("You must be logged in to delete a meme");
+    }
+
+    const memeRef = doc(db, "memes", memeId);
+    const memeDoc = await getDoc(memeRef);
+
+    if (!memeDoc.exists()) {
+      throw new Error("Meme not found");
+    }
+
+    const memeData = memeDoc.data();
+    
+    // Check if the current user is the owner
+    if (memeData.userId !== auth.currentUser.uid) {
+      throw new Error("You don't have permission to delete this meme");
+    }
+
+    // Start a batch write
+    const batch = writeBatch(db);
+
+    // Delete the meme document
+    batch.delete(memeRef);
+
+    // Update user stats
+    const userRef = doc(db, "users", auth.currentUser.uid);
+    batch.update(userRef, {
+      memeCount: increment(-1),
+      lastDeletedAt: serverTimestamp(),
+    });
+
+    // Commit the batch
+    await batch.commit();
+
+    return true;
+  } catch (error) {
+    console.error("Error deleting meme:", error);
+    throw error;
+  }
 }

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MemeHQ - Leaderboard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Impact&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="stylesheet" href="styles/leaderboard.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="logo">
+          <i class="fas fa-fire"></i>
+          <span>MemeHQ</span>
+        </div>
+        <nav class="nav-menu">
+          <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+          </a>
+          <a href="create.html" class="nav-item auth-required">
+            <i class="fas fa-plus-circle"></i>
+            <span>Create Meme</span>
+          </a>
+          <a href="analytics.html" class="nav-item auth-required">
+            <i class="fas fa-chart-line"></i>
+            <span>Analytics</span>
+          </a>
+          <a href="leaderboard.html" class="nav-item active">
+            <i class="fas fa-trophy"></i>
+            <span>Leaderboard</span>
+          </a>
+          <a href="badges.html" class="nav-item auth-required">
+            <i class="fas fa-medal"></i>
+            <span>My Badges</span>
+          </a>
+        </nav>
+        
+        <!-- Theme Toggle -->
+        <button id="themeToggle" class="theme-toggle" title="Toggle theme">
+          <i class="fas fa-moon"></i>
+        </button>
+
+        <div class="user-profile">
+          <img
+            src="https://ui-avatars.com/api/?name=U"
+            alt="User"
+            id="userAvatar"
+            class="user-avatar"
+          />
+          <div class="user-info">
+            <span id="userName">Guest</span>
+            <button id="logoutBtn" class="logout-btn">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <header class="top-bar">
+          <h1>Leaderboard</h1>
+          <div class="time-filter">
+            <button class="btn btn-secondary active" data-period="day">24h</button>
+            <button class="btn btn-secondary" data-period="week">Week</button>
+            <button class="btn btn-secondary" data-period="month">Month</button>
+            <button class="btn btn-secondary" data-period="all">All Time</button>
+          </div>
+        </header>
+
+        <div class="leaderboard-container">
+          <!-- Top Creators Section -->
+          <div class="leaderboard-section">
+            <h2><i class="fas fa-crown"></i> Top Creators</h2>
+            <div class="leaderboard-grid" id="topCreators">
+              <!-- Top creators will be loaded here -->
+              <div class="loader">
+                <i class="fas fa-spinner fa-spin"></i> Loading...
+              </div>
+            </div>
+          </div>
+
+          <!-- Trending Memes Section -->
+          <div class="leaderboard-section">
+            <h2><i class="fas fa-fire"></i> Trending Memes</h2>
+            <div class="meme-grid" id="trendingMemes">
+              <!-- Trending memes will be loaded here -->
+              <div class="loader">
+                <i class="fas fa-spinner fa-spin"></i> Loading...
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Tags Section -->
+          <div class="leaderboard-section">
+            <h2><i class="fas fa-hashtag"></i> Trending Tags</h2>
+            <div class="tag-cloud" id="trendingTags">
+              <!-- Trending tags will be loaded here -->
+              <div class="loader">
+                <i class="fas fa-spinner fa-spin"></i> Loading...
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { auth } from "./scripts/firebase.js";
+      import { initAuth, handleLogout } from "./scripts/auth.js";
+      import { showToast, showLoading, hideLoading } from "./scripts/utils.js";
+      import {
+        getTopCreators,
+        getTrendingMemes,
+        getTrendingTags,
+      } from "./scripts/database.js";
+
+      // Initialize auth
+      initAuth();
+
+      // DOM Elements
+      const topCreatorsEl = document.getElementById("topCreators");
+      const trendingMemesEl = document.getElementById("trendingMemes");
+      const trendingTagsEl = document.getElementById("trendingTags");
+      const timeFilterBtns = document.querySelectorAll(".time-filter button");
+      const logoutBtn = document.getElementById("logoutBtn");
+
+      // Current filter period
+      let currentPeriod = "day";
+
+      // Set up logout button
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", handleLogout);
+      }
+
+      // Load leaderboard data
+      async function loadLeaderboardData(period = "day") {
+        showLoading(topCreatorsEl);
+        showLoading(trendingMemesEl);
+        showLoading(trendingTagsEl);
+
+        try {
+          // Load top creators
+          const creators = await getTopCreators(period);
+          topCreatorsEl.innerHTML = creators
+            .map(
+              (creator, index) => `
+            <div class="creator-card ${index < 3 ? "top-" + (index + 1) : ""}">
+              <div class="rank">#${index + 1}</div>
+              <img src="${
+                creator.photoURL ||
+                `https://ui-avatars.com/api/?name=${creator.userName}`
+              }" alt="${creator.userName}" class="creator-avatar">
+              <div class="creator-info">
+                <h3>${creator.userName}</h3>
+                <p>${creator.totalLikes} likes · ${
+                creator.memeCount
+              } memes</p>
+              </div>
+            </div>
+          `
+            )
+            .join("");
+
+          // Load trending memes
+          const memes = await getTrendingMemes(period);
+          trendingMemesEl.innerHTML = memes
+            .map(
+              (meme, index) => `
+            <div class="meme-card">
+              <img src="${meme.imageUrl}" alt="${meme.title}" class="meme-thumb">
+              <div class="meme-info">
+                <h3>${meme.title}</h3>
+                <p>
+                  <i class="fas fa-arrow-up"></i> ${meme.likes}
+                  <i class="fas fa-eye"></i> ${meme.views}
+                  <i class="fas fa-comment"></i> ${meme.commentCount}
+                </p>
+                <small>by ${meme.userName}</small>
+              </div>
+            </div>
+          `
+            )
+            .join("");
+
+          // Load trending tags
+          const tags = await getTrendingTags(period);
+          trendingTagsEl.innerHTML = tags
+            .map(
+              (tag) => `
+            <a href="index.html?tag=${tag.name}" class="tag-bubble" 
+               style="font-size: ${Math.max(1, Math.min(2, tag.weight))}em">
+              #${tag.name}
+            </a>
+          `
+            )
+            .join("");
+        } catch (error) {
+          console.error("Error loading leaderboard:", error);
+          showToast("Failed to load leaderboard data", "error");
+        }
+      }
+
+      // Handle time filter changes
+      timeFilterBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          timeFilterBtns.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          currentPeriod = btn.dataset.period;
+          loadLeaderboardData(currentPeriod);
+        });
+      });
+
+      // Initial load
+      document.addEventListener("DOMContentLoaded", () => {
+        loadLeaderboardData(currentPeriod);
+      });
+    </script>
+  
+    <script type="module">
+      import { initTheme, toggleTheme } from './scripts/theme.js';
+      
+      // Initialize theme system
+      initTheme();
+      
+      // Set up theme toggle
+      const themeToggle = document.getElementById('themeToggle');
+      themeToggle.addEventListener('click', toggleTheme);
+    </script>
+
+  </body>
+</html> 

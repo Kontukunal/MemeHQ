@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MemeHQ - Dashboard</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Comic+Neue:wght@700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Comic+Neue:wght@700&display=swap"
       rel="stylesheet"
     />
     <link
@@ -45,6 +45,12 @@
             <span>My Badges</span>
           </a>
         </nav>
+        
+        <!-- Theme Toggle -->
+        <button id="themeToggle" class="theme-toggle" title="Toggle theme">
+          <i class="fas fa-moon"></i>
+        </button>
+
         <div class="user-profile">
           <img
             src="https://ui-avatars.com/api/?name=U"
@@ -115,6 +121,7 @@
         searchMemesByTag,
         getTopCreators,
         getMemeComments,
+        deleteMeme,
       } from "./scripts/database.js";
       import {
         showToast,
@@ -203,100 +210,87 @@
             .map(
               (meme) => `
               <div class="meme-card" data-id="${meme.id}">
+                ${meme.userId === auth.currentUser?.uid ? `
+                  <div class="meme-owner-actions">
+                    <button class="owner-action-btn edit-btn" title="Edit meme">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="owner-action-btn delete-btn" title="Delete meme">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                ` : ''}
+                
                 <div class="meme-image-container">
-                  <img src="${meme.imageUrl}" alt="${
-                meme.title
-              }" class="meme-image">
-                  ${
-                    meme.textElements?.length
-                      ? '<canvas class="meme-text-canvas"></canvas>'
-                      : ""
-                  }
+                  <img src="${meme.imageUrl}" alt="${meme.title}" class="meme-image">
+                  ${meme.textElements?.length ? '<canvas class="meme-text-canvas"></canvas>' : ''}
                 </div>
+                
                 <div class="meme-info">
                   <h3 class="meme-title">${meme.title || "Untitled Meme"}</h3>
-                  <p class="meme-author">By ${meme.userName || "Anonymous"}</p>
+                  <div class="meme-author">
+                    <img src="${meme.userPhotoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(meme.userName)}`}" alt="${meme.userName}">
+                    <span>${meme.userName || "Anonymous"}</span>
+                  </div>
+                  
+                  ${meme.tags?.length ? `
+                    <div class="meme-tags">
+                      ${meme.tags.slice(0, 3).map(tag => `
+                        <span class="meme-tag" data-tag="${tag}">#${tag}</span>
+                      `).join('')}
+                    </div>
+                  ` : ''}
+                </div>
 
-                  ${
-                    meme.tags?.length
-                      ? `
-                        <div class="meme-tags">
-                          ${meme.tags
-                            .slice(0, 3)
-                            .map(
-                              (tag) => `
-                            <span class="meme-tag">#${tag}</span>
-                          `
-                            )
-                            .join("")}
-                        </div>
-                      `
-                      : ""
-                  }
-
-                  <div class="meme-stats">
-                    <div class="vote-buttons">
-                      <button class="vote-btn upvote ${
-                        meme.likedBy?.includes(auth.currentUser?.uid)
-                          ? "active"
-                          : ""
-                      }"
-                              data-action="upvote">
-                        <i class="fas fa-arrow-up"></i>
-                      </button>
+                <div class="meme-stats">
+                  <div class="vote-buttons">
+                    <button class="vote-btn upvote ${meme.likedBy?.includes(auth.currentUser?.uid) ? "active" : ""}"
+                            data-action="upvote">
+                      <i class="fas fa-arrow-up"></i>
                       <span class="like-count">${meme.likes || 0}</span>
-                      <button class="vote-btn downvote ${
-                        meme.dislikedBy?.includes(auth.currentUser?.uid)
-                          ? "active"
-                          : ""
-                      }"
-                              data-action="downvote">
-                        <i class="fas fa-arrow-down"></i>
-                      </button>
-                    </div>
-                    <button class="comment-toggle">
-                      <i class="fas fa-comment"></i> ${meme.commentCount || 0}
                     </button>
-                    <button class="report-btn">
-                      <i class="fas fa-flag"></i> Report
+                    <button class="vote-btn downvote ${meme.dislikedBy?.includes(auth.currentUser?.uid) ? "active" : ""}"
+                            data-action="downvote">
+                      <i class="fas fa-arrow-down"></i>
                     </button>
                   </div>
+                  
+                  <div class="meme-actions">
+                    <button class="action-btn comment-toggle">
+                      <i class="fas fa-comment"></i>
+                      <span>${meme.commentCount || 0}</span>
+                    </button>
+                    <button class="action-btn share-btn">
+                      <i class="fas fa-share"></i>
+                    </button>
+                    <button class="action-btn report-btn">
+                      <i class="fas fa-flag"></i>
+                    </button>
+                  </div>
+                </div>
 
-                  <div class="comment-section" style="display: none;">
-                    <div class="comment-list">
-                      ${
-                        meme.comments && meme.comments.length > 0
-                          ? meme.comments
-                              .slice(0, 3)
-                              .map(
-                                (comment) => `
-                                  <div class="comment-item">
-                                    <div class="comment-author">${
-                                      comment.author
-                                    }</div>
-                                    <div class="comment-text">${
-                                      comment.text
-                                    }</div>
-                                    <div class="comment-time">${formatDate(
-                                      comment.createdAt?.toDate()
-                                    )}</div>
-                                  </div>
-                                `
-                              )
-                              .join("")
-                          : "<p>No comments yet</p>"
-                      }
-                    </div>
-                    <form class="comment-form">
-                      <input type="text" class="comment-input" placeholder="Add a comment..." maxlength="140">
-                      <button type="submit" class="comment-submit">Post</button>
-                    </form>
+                <div class="comment-section" style="display: none;">
+                  <div class="comment-list">
+                    ${meme.comments && meme.comments.length > 0 ? 
+                      meme.comments.slice(0, 3).map(comment => `
+                        <div class="comment-item">
+                          <div class="comment-author">${comment.author}</div>
+                          <div class="comment-text">${comment.text}</div>
+                          <div class="comment-time">${formatDate(comment.createdAt?.toDate())}</div>
+                        </div>
+                      `).join('') : 
+                      '<p class="no-comments">No comments yet</p>'
+                    }
                   </div>
+                  <form class="comment-form">
+                    <input type="text" class="comment-input" placeholder="Add a comment..." maxlength="140">
+                    <button type="submit" class="comment-submit">Post</button>
+                  </form>
                 </div>
               </div>
             `
             )
-            .join("");
+            .join('');
 
           // Render text on memes
           memesWithComments.forEach((meme, index) => {
@@ -504,6 +498,64 @@
               }
             }
           }
+
+          // Handle edit button click
+          if (e.target.closest(".edit-btn")) {
+            const memeCard = e.target.closest(".meme-card");
+            const memeId = memeCard.dataset.id;
+            window.location.href = `create.html?edit=${memeId}`;
+          }
+
+          // Handle delete button click
+          if (e.target.closest(".delete-btn")) {
+            const memeCard = e.target.closest(".meme-card");
+            const memeId = memeCard.dataset.id;
+            
+            // Create and show delete confirmation modal
+            const modalHtml = `
+              <div class="modal-overlay">
+                <div class="delete-modal">
+                  <h3><i class="fas fa-exclamation-triangle"></i> Delete Meme</h3>
+                  <p>Are you sure you want to delete this meme? This action cannot be undone.</p>
+                  <div class="modal-actions">
+                    <button class="modal-btn cancel">Cancel</button>
+                    <button class="modal-btn delete">Delete</button>
+                  </div>
+                </div>
+              </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Handle modal actions
+            const modal = document.querySelector('.modal-overlay');
+            const handleModalClick = async (event) => {
+              if (event.target.classList.contains('cancel') || event.target === modal) {
+                modal.remove();
+              } else if (event.target.classList.contains('delete')) {
+                try {
+                  const deleteBtn = event.target;
+                  deleteBtn.disabled = true;
+                  deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+                  
+                  await deleteMeme(memeId);
+                  memeCard.style.opacity = '0';
+                  setTimeout(() => {
+                    memeCard.remove();
+                    modal.remove();
+                    showToast('Meme deleted successfully', 'success');
+                  }, 300);
+                } catch (error) {
+                  const deleteBtn = modal.querySelector('.delete');
+                  deleteBtn.disabled = false;
+                  deleteBtn.textContent = 'Delete';
+                  showToast(error.message, 'error');
+                }
+              }
+            };
+            
+            modal.addEventListener('click', handleModalClick);
+          }
         });
       }
 
@@ -573,8 +625,20 @@
 
         // Initial load
         loadMemes();
-        loadTrendingTags();
+        // loadTrendingTags();
       });
     </script>
+  
+    <script type="module">
+      import { initTheme, toggleTheme } from './scripts/theme.js';
+      
+      // Initialize theme system
+      initTheme();
+      
+      // Set up theme toggle
+      const themeToggle = document.getElementById('themeToggle');
+      themeToggle.addEventListener('click', toggleTheme);
+    </script>
+
   </body>
 </html>
