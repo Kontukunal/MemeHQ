@@ -51,9 +51,9 @@ export function initAuth() {
           await ensureUserDocumentExists(user);
           updateUserUI(user);
 
-          if (currentPage === "login.html") {
-            const redirectTo =
-              sessionStorage.getItem("redirectTo") || "index.html";
+          // If on login page and user is authenticated, redirect
+          if (currentPage === "login.html" || currentPage === "") {
+            const redirectTo = sessionStorage.getItem("redirectTo") || "index.html";
             sessionStorage.removeItem("redirectTo");
             window.location.href = redirectTo;
           }
@@ -105,25 +105,23 @@ function updateUserUI(user) {
 
 export async function handleLogin(email, password) {
   try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
     // Update user document
     const userRef = doc(db, "users", user.uid);
-    await setDoc(
-      userRef,
-      {
-        lastActive: serverTimestamp(),
-        photoURL: user.photoURL || null,
-      },
-      { merge: true }
-    );
+    await setDoc(userRef, {
+      lastActive: serverTimestamp(),
+      photoURL: user.photoURL || null,
+    }, { merge: true });
 
     showToast("Login successful!", "success");
+    
+    // Force redirect after successful login
+    const redirectTo = sessionStorage.getItem("redirectTo") || "index.html";
+    sessionStorage.removeItem("redirectTo");
+    window.location.href = redirectTo;
+    
     return { success: true };
   } catch (error) {
     let errorMessage = "Login failed";

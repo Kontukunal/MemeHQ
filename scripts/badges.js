@@ -228,11 +228,11 @@ export async function checkAndAwardBadge(userId, badgeId) {
 
     const userRef = doc(db, "users", userId);
     const userDoc = await getDoc(userRef);
-
+    
     if (!userDoc.exists()) {
       throw new Error("User not found");
     }
-
+    
     const userBadges = userDoc.data().badges || [];
     if (userBadges.includes(badgeId)) {
       return { awarded: false, alreadyHas: true };
@@ -277,7 +277,7 @@ export async function getBadgeProgress(userId) {
     
     await Promise.all(
       Object.entries(BADGES).map(async ([badgeId, badge]) => {
-        const result = await badge.checkProgress(userId);
+      const result = await badge.checkProgress(userId);
         progress[badgeId] = typeof result === 'object' ? result.progress : (result ? 100 : 0);
       })
     );
