@@ -131,22 +131,25 @@
         if (authError) authError.textContent = "";
       });
 
-      // Handle login
+      // In the login form submit handler
       loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
 
-        // Log the stored redirect URL before login
-        console.log("Redirect URL before login:", sessionStorage.getItem("redirectTo"));
+        console.log("Attempting login...");
+        console.log(
+          "Stored redirect URL:",
+          sessionStorage.getItem("redirectTo")
+        );
 
         const result = await handleLogin(email, password);
         if (result.success) {
           showToast("Login successful!", "success");
-          // The redirection will be handled by initAuth
+          // The auth state change handler will handle the redirect
         } else {
-          if (authError) authError.textContent = result.error;
-          else showToast(result.error, "error");
+          console.log("Login failed:", result.error);
+          authError.textContent = result.error;
         }
       });
 
@@ -155,7 +158,8 @@
         e.preventDefault();
         const email = document.getElementById("signupEmail").value;
         const password = document.getElementById("signupPassword").value;
-        const confirmPassword = document.getElementById("confirmPassword").value;
+        const confirmPassword =
+          document.getElementById("confirmPassword").value;
 
         if (password !== confirmPassword) {
           if (authError) authError.textContent = "Passwords do not match";
@@ -173,17 +177,16 @@
         }
       });
     </script>
-  
+
     <script type="module">
-      import { initTheme, toggleTheme } from './scripts/theme.js';
-      
+      import { initTheme, toggleTheme } from "./scripts/theme.js";
+
       // Initialize theme system
       initTheme();
-      
-      // Set up theme toggle
-      const themeToggle = document.getElementById('themeToggle');
-      themeToggle.addEventListener('click', toggleTheme);
-    </script>
 
+      // Set up theme toggle
+      const themeToggle = document.getElementById("themeToggle");
+      themeToggle.addEventListener("click", toggleTheme);
+    </script>
   </body>
 </html>

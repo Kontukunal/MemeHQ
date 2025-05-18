@@ -258,17 +258,17 @@ export async function getTopCreators(period = "day") {
     memesSnapshot.forEach((doc) => {
       const meme = doc.data();
       const creatorId = meme.userId;
-      
+
       if (!creatorStats[creatorId]) {
         creatorStats[creatorId] = {
           userId: creatorId,
           userName: meme.userName,
           photoURL: meme.userPhotoURL,
           totalLikes: 0,
-          memeCount: 0
+          memeCount: 0,
         };
       }
-      
+
       creatorStats[creatorId].totalLikes += meme.likes;
       creatorStats[creatorId].memeCount++;
     });
@@ -318,15 +318,13 @@ export async function getTrendingMemes(period = "day") {
     const memes = [];
     memesSnapshot.forEach((doc) => {
       const meme = doc.data();
-      const engagementScore = 
-        meme.likes + 
-        Math.floor(meme.views / 10) + 
-        (meme.commentCount * 2);
-      
+      const engagementScore =
+        meme.likes + Math.floor(meme.views / 10) + meme.commentCount * 2;
+
       memes.push({
         id: doc.id,
         ...meme,
-        engagementScore
+        engagementScore,
       });
     });
 
@@ -377,13 +375,13 @@ export async function getTrendingTags(period = "day") {
     memesSnapshot.forEach((doc) => {
       const meme = doc.data();
       const tags = meme.tags || [];
-      
+
       tags.forEach((tag) => {
         if (!tagStats[tag]) {
           tagStats[tag] = {
             name: tag,
             count: 0,
-            weight: 0
+            weight: 0,
           };
         }
         tagStats[tag].count++;
@@ -393,7 +391,7 @@ export async function getTrendingTags(period = "day") {
 
     // Calculate weights (1.0 to 2.0 scale)
     Object.values(tagStats).forEach((tag) => {
-      tag.weight = 1 + (tag.count / maxCount);
+      tag.weight = 1 + tag.count / maxCount;
     });
 
     // Sort by count and return top 20
@@ -421,7 +419,7 @@ export async function deleteMeme(memeId) {
     }
 
     const memeData = memeDoc.data();
-    
+
     // Check if the current user is the owner
     if (memeData.userId !== auth.currentUser.uid) {
       throw new Error("You don't have permission to delete this meme");
@@ -448,4 +446,57 @@ export async function deleteMeme(memeId) {
     console.error("Error deleting meme:", error);
     throw error;
   }
+}
+
+export async function recordMemeStats(memeId) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const historyRef = doc(
+    db,
+    `memes/${memeId}/history`,
+    today.toISOString().split("T")[0]
+  );
+
+  await setDoc(
+    historyRef,
+    {
+      date: today,
+      likes: increment(0),
+      views: increment(0),
+      comments: increment(0),
+      userId: auth.currentUser.uid,
+    },
+    { merge: true }
+  );
+}
+
+export async function trackMemeView(memeId) {
+  const batch = writeBatch(db);
+
+  // Update main meme doc
+  const memeRef = doc(db, "memes", memeId);
+  batch.update(memeRef, {
+    views: increment(1),
+  });
+
+  // Update daily history
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const historyRef = doc(
+    db,
+    `memes/${memeId}/history`,
+    today.toISOString().split("T")[0]
+  );
+  batch.set(
+    historyRef,
+    {
+      date: today,
+      views: increment(1),
+      userId: auth.currentUser?.uid || null,
+    },
+    { merge: true }
+  );
+
+  await batch.commit();
 }
