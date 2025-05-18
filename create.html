@@ -490,9 +490,7 @@
 
         try {
           const user = auth.currentUser;
-          const title =
-            prompt("Enter a title for your meme:", "My Awesome Meme") ||
-            "Untitled Meme";
+          const title = prompt("Enter a title for your meme:", "My Awesome Meme") || "Untitled Meme";
           const tags = extractHashtags(memeTags.value);
 
           // Validate text elements
@@ -527,20 +525,40 @@
             reports: 0,
           };
 
-          // Save to Firestore
+          // Save to Firestore and wait for completion
           const memeId = await saveMeme(memeData);
-
-          // Check for badges
+          
+          // Wait for badge check to complete
           await checkAndAwardBadge(user.uid, "FIRST_MEME");
 
+          // Show success message
           showToast("Meme published successfully!", "success");
-          setTimeout(() => {
-            window.location.href = "index.html";
-          }, 1500);
+
+          // Create a promise that resolves after the toast is shown
+          await new Promise(resolve => {
+            // Ensure button is restored to original state
+            hideLoading(publishBtn, originalBtnHTML);
+            
+            // Wait a moment for the UI to update
+            setTimeout(() => {
+              // Attempt redirect using multiple methods
+              try {
+                window.location.replace("index.html");
+              } catch (e) {
+                try {
+                  window.location.href = "index.html";
+                } catch (e2) {
+                  // Final fallback
+                  document.location = "index.html";
+                }
+              }
+              resolve();
+            }, 800);
+          });
+
         } catch (error) {
           console.error("Publish error:", error);
           showToast(`Publish failed: ${error.message}`, "error");
-        } finally {
           hideLoading(publishBtn, originalBtnHTML);
         }
       }
