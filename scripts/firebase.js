@@ -27,16 +27,4 @@ const auth = getAuth(app);
 const db = initializeFirestore(app, {
   localCache: persistentLocalCache(),
 });
-// Legacy approach (will be deprecated)
-// const db = getFirestore(app);
-// enableIndexedDbPersistence(db).catch((err) => {
-//   if (err.code == "failed-precondition") {
-//     console.log("Offline persistence already enabled in another tab");
-//   } else if (err.code == "unimplemented") {
-//     console.log("Browser doesn't support offline persistence");
-//   }
-// });
-
-// Export both auth and db
 export { auth, db };
-
