@@ -198,7 +198,7 @@
         
         <!-- Theme Toggle -->
         <button id="themeToggle" class="theme-toggle" title="Toggle theme">
-          <i class="fas fa-moon"></i>
+          <i class="fas fa-sun"></i>
         </button>
 
         <div class="user-profile">
@@ -221,148 +221,37 @@
       <div class="main-content">
         <div class="badges-container">
           <div class="badges-header">
-            <h1><i class="fas fa-medal"></i> My Badges</h1>
+            <h1>My Badges</h1>
           </div>
 
-          <!-- Stats Cards -->
+          <!-- Stats Section -->
           <div class="badges-stats">
             <div class="stat-card">
-              <h3 id="totalBadges">0</h3>
+              <h3 id="total-badges">0</h3>
               <p>Badges Earned</p>
             </div>
             <div class="stat-card">
-              <h3 id="rarity">0%</h3>
-              <p>Rarity Score</p>
+              <h3 id="available-badges">0</h3>
+              <p>Available Badges</p>
             </div>
             <div class="stat-card">
-              <h3 id="rank">--</h3>
-              <p>Global Rank</p>
+              <h3 id="completion-rate">0%</h3>
+              <p>Completion Rate</p>
             </div>
           </div>
 
           <!-- Badges Grid -->
-          <div class="badges-grid" id="badgesGrid">
-            <!-- Badges will be loaded here -->
-            <div class="loader">
-              <i class="fas fa-spinner fa-spin"></i> Loading badges...
-            </div>
+          <div class="badges-grid">
+            <!-- Badges will be dynamically inserted here -->
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Scripts -->
     <script type="module">
-      import { auth } from "./scripts/firebase.js";
-      import { initAuth, handleLogout } from "./scripts/auth.js";
-      import { showToast, showLoading, hideLoading } from "./scripts/utils.js";
-      import { getUserBadges, getAllBadges, getTotalUsers } from "./scripts/badges.js";
-
-      // Initialize auth
-      initAuth();
-
-      // DOM Elements
-      const badgesGrid = document.getElementById("badgesGrid");
-      const totalBadgesEl = document.getElementById("totalBadges");
-      const rarityEl = document.getElementById("rarity");
-      const rankEl = document.getElementById("rank");
-      const logoutBtn = document.getElementById("logoutBtn");
-
-      // Set up logout button
-      if (logoutBtn) {
-        logoutBtn.addEventListener("click", handleLogout);
-      }
-
-      // Show achievement popup
-      function showAchievement(badge) {
-        const popup = document.createElement("div");
-        popup.className = "achievement-popup";
-        popup.innerHTML = `
-          <div class="achievement-icon ${badge.rarity}">
-            <i class="${badge.icon}"></i>
-          </div>
-          <div class="achievement-details">
-            <h3>New Badge Unlocked!</h3>
-            <p>${badge.name}</p>
-          </div>
-        `;
-
-        document.body.appendChild(popup);
-        setTimeout(() => popup.remove(), 5000);
-      }
-
-      // Load badges data
-      async function loadBadgesData() {
-        if (!auth.currentUser) {
-          window.location.href = "login.html";
-          return;
-        }
-
-        showLoading(badgesGrid);
-
-        try {
-          const [userBadges, allBadges, totalUsers] = await Promise.all([
-            getUserBadges(auth.currentUser.uid),
-            getAllBadges(),
-            getTotalUsers()
-          ]);
-
-          // Update stats
-          totalBadgesEl.textContent = userBadges.length;
-          
-          // Calculate rarity score (percentage of users with fewer badges)
-          const userScore = userBadges.reduce((score, badge) => {
-            const rarityScores = { common: 1, rare: 2, epic: 3, legendary: 4 };
-            return score + (rarityScores[badge.rarity] || 1);
-          }, 0);
-          
-          const rarityScore = Math.round((userScore / (totalUsers * 4)) * 100);
-          rarityEl.textContent = `${rarityScore}%`;
-
-          // Calculate rank (mock data - replace with actual ranking logic)
-          const rank = Math.max(1, Math.round(totalUsers * (1 - rarityScore / 100)));
-          rankEl.textContent = `#${rank}`;
-
-          // Display badges
-          badgesGrid.innerHTML = allBadges.map(badge => {
-            const userHasBadge = userBadges.some(b => b.id === badge.id);
-            const progress = userHasBadge ? 100 : 0; // Replace with actual progress
-
-            return `
-              <div class="badge-card ${!userHasBadge ? 'locked' : ''}">
-                <div class="badge-icon ${badge.rarity}">
-                  <i class="${badge.icon}"></i>
-                </div>
-                <h3 class="badge-name">${badge.name}</h3>
-                <p class="badge-description">${badge.description}</p>
-                <div class="badge-progress">
-                  <div class="progress-bar" style="width: ${progress}%"></div>
-                </div>
-              </div>
-            `;
-          }).join('');
-
-        } catch (error) {
-          console.error('Error loading badges:', error);
-          showToast('Failed to load badges', 'error');
-        } finally {
-          hideLoading(badgesGrid);
-        }
-      }
-
-      // Initialize
-      document.addEventListener('DOMContentLoaded', loadBadgesData);
+      import { initCurrentPage } from "./scripts/init.js";
+      document.addEventListener("DOMContentLoaded", initCurrentPage);
     </script>
-  
-    <script type="module">
-      import { initTheme, toggleTheme } from './scripts/theme.js';
-      
-      // Initialize theme system
-      initTheme();
-      
-      // Set up theme toggle
-      const themeToggle = document.getElementById('themeToggle');
-      themeToggle.addEventListener('click', toggleTheme);
-    </script>
-
   </body>
 </html> 
