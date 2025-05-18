@@ -12,7 +12,7 @@ const themes = {
     '--success': '#00b894',
     '--error': '#d63031',
     '--warning': '#fdcb6e',
-    '--shadow-sm': '0 2px 4px rgba(0, 0, 0, 0.3)',
+    '--shadow-sm': '0 2px 4px rgba(0, 0, 0, 0.32)',
     '--shadow-md': '0 4px 6px rgba(0, 0, 0, 0.4)',
     '--shadow-lg': '0 10px 15px rgba(0, 0, 0, 0.5)',
     '--shadow-xl': '0 20px 25px rgba(0, 0, 0, 0.6)',

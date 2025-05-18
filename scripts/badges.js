@@ -198,10 +198,15 @@ export async function getUserBadges(userId) {
 
 // Get all available badges
 export async function getAllBadges() {
-  return Object.values(BADGES);
+  try {
+    return BADGES;
+  } catch (error) {
+    console.error("Error getting all badges:", error);
+    throw error;
+  }
 }
 
-// Get total number of users (for rarity calculations)
+// Get total users for leaderboard context
 export async function getTotalUsers() {
   try {
     const usersRef = collection(db, "users");
@@ -209,7 +214,7 @@ export async function getTotalUsers() {
     return snapshot.size;
   } catch (error) {
     console.error("Error getting total users:", error);
-    return 100; // Fallback value
+    return 0;
   }
 }
 
@@ -217,62 +222,66 @@ export async function getTotalUsers() {
 export async function checkAndAwardBadge(userId, badgeId) {
   try {
     const badge = BADGES[badgeId];
-    if (!badge) return false;
+    if (!badge) {
+      throw new Error("Invalid badge ID");
+    }
 
     const userRef = doc(db, "users", userId);
     const userDoc = await getDoc(userRef);
-    
-    if (!userDoc.exists()) return false;
-    
+
+    if (!userDoc.exists()) {
+      throw new Error("User not found");
+    }
+
     const userBadges = userDoc.data().badges || [];
-    if (userBadges.some(b => b.id === badgeId)) return false;
+    if (userBadges.includes(badgeId)) {
+      return { awarded: false, alreadyHas: true };
+    }
 
     const progress = await badge.checkProgress(userId);
     const achieved = typeof progress === 'object' ? progress.achieved : progress;
 
     if (achieved) {
       await updateDoc(userRef, {
-        badges: arrayUnion({
-          id: badge.id,
-          name: badge.name,
-          description: badge.description,
-          icon: badge.icon,
-          rarity: badge.rarity,
-          awardedAt: serverTimestamp()
-        })
+        badges: arrayUnion(badgeId),
+        lastBadgeAt: serverTimestamp()
       });
-
-      showToast(`New badge unlocked: ${badge.name}!`, "success");
-      return true;
+      return { awarded: true, badge };
     }
 
-    return false;
+    return { awarded: false, progress };
   } catch (error) {
-    console.error("Error checking badge:", error);
-    return false;
+    console.error("Error checking/awarding badge:", error);
+    throw error;
   }
 }
 
 // Check all badges for a user
 export async function checkAllBadges(userId) {
   try {
-    const promises = Object.keys(BADGES).map(badgeId => 
-      checkAndAwardBadge(userId, badgeId)
+    const results = await Promise.all(
+      Object.keys(BADGES).map(badgeId => checkAndAwardBadge(userId, badgeId))
     );
-    await Promise.all(promises);
+    
+    return results.filter(result => result.awarded);
   } catch (error) {
     console.error("Error checking all badges:", error);
+    throw error;
   }
 }
 
-// Get badge progress for available badges
+// Get progress for all badges
 export async function getBadgeProgress(userId) {
   try {
     const progress = {};
-    for (const [badgeId, badge] of Object.entries(BADGES)) {
-      const result = await badge.checkProgress(userId);
-      progress[badgeId] = typeof result === 'object' ? result : { achieved: result, progress: result ? 100 : 0 };
-    }
+    
+    await Promise.all(
+      Object.entries(BADGES).map(async ([badgeId, badge]) => {
+        const result = await badge.checkProgress(userId);
+        progress[badgeId] = typeof result === 'object' ? result.progress : (result ? 100 : 0);
+      })
+    );
+    
     return progress;
   } catch (error) {
     console.error("Error getting badge progress:", error);

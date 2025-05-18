@@ -262,25 +262,7 @@
 }
 
 .loader {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 20px;
-  color: var(--gray);
-}
-
-.loader i {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  display: none;
 }
 
 @media (max-width: 768px) {
@@ -316,5 +298,15 @@
 
   .time-filter {
     margin-top: 12px;
+  }
+}
+
+/* Remove spin animation */
+@keyframes spin {
+  from {
+    transform: none;
+  }
+  to {
+    transform: none;
   }
 }

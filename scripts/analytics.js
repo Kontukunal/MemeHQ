@@ -8,15 +8,23 @@ import {
   orderBy,
   getDocs,
   serverTimestamp,
+  addDoc,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { showToast, formatDate } from "./utils.js";
 
 // Load Chart.js from CDN
 const Chart = await import("https://cdn.jsdelivr.net/npm/chart.js@4.4.0/+esm");
 
+// Global variables
+let historicalChart = null;
+let currentPeriod = "24h";
+
 // Initialize the analytics page
 export async function initAnalyticsPage() {
   try {
+    // Show loading state
+    document.getElementById("analytics-container").innerHTML = '<div class="empty-state">Loading analytics...</div>';
+
     // Check authentication
     if (!auth.currentUser) {
       showToast("Please login to view analytics", "error");
@@ -40,7 +48,13 @@ export async function initAnalyticsPage() {
       getHistoricalEngagement(memeId),
     ]);
 
-    if (!memeData) return;
+    if (!memeData) {
+      document.getElementById("analytics-container").innerHTML = '<div class="empty-state">No data available</div>';
+      return;
+    }
+
+    // Clear loading state
+    document.getElementById("analytics-container").innerHTML = ''; // Clear loading message
 
     // Render all data
     renderBasicStats(memeData);
@@ -53,6 +67,12 @@ export async function initAnalyticsPage() {
   } catch (error) {
     console.error("Error initializing analytics:", error);
     showToast("Failed to load analytics", "error");
+    document.getElementById("analytics-container").innerHTML = `
+      <div class="empty-state">
+        <h3>Error Loading Analytics</h3>
+        <p>${error.message}</p>
+      </div>
+    `;
   }
 }
 
@@ -298,7 +318,7 @@ function renderEngagementChart(memeData) {
       },
       animation: {
         animateScale: true,
-        animateRotate: true,
+        animateRotate: false,
       },
     },
   });
@@ -330,7 +350,7 @@ function renderHistoricalChart(historicalData) {
   historicalChart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: historicalData.map((data) => formatDateLabel(data.date)),
+      labels: historicalData.map((data) => formatDateLabel(data.timestamp)),
       datasets: [
         {
           label: "Likes",

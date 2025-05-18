@@ -117,12 +117,7 @@
 
   /* Loading Animation */
   .loader {
-    width: 48px;
-    height: 48px;
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid var(--primary-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+    display: none;
   }
 
   @keyframes spin {
@@ -442,7 +437,7 @@
   }
 
   .logo i {
-    color: var(--secondary);
+    color: var(--secondary-color);
   }
 
   .logo img {
@@ -464,7 +459,7 @@
   }
 
   .nav-link:hover {
-    color: var(--secondary);
+    color: var(--secondary-color);
   }
 
   .nav-link::after {
@@ -474,7 +469,7 @@
     left: 0;
     width: 0;
     height: 2px;
-    background-color: var(--secondary);
+    background-color: var(--secondary-color);
     transition: var(--transition);
   }
 
@@ -518,7 +513,7 @@
   }
 
   .nav-item.active {
-    background-color: var(--primary);
+    background-color: var(--primary-color);
     color: white;
   }
 
@@ -551,7 +546,7 @@
   .user-info button {
     background: none;
     border: none;
-    color: var(--secondary);
+    color: var(--secondary-color);
     cursor: pointer;
     text-align: left;
     font-size: 0.8rem;
@@ -727,7 +722,7 @@
 
   .meme-action-btn:hover {
     background-color: var(--hover-bg);
-    color: var(--primary);
+    color: var(--primary-color);
     transform: translateY(-2px);
   }
 
@@ -768,7 +763,7 @@
   }
 
   .meme-stat:hover {
-    color: var(--primary);
+    color: var(--primary-color);
   }
 
   .meme-stat.liked {
@@ -811,7 +806,7 @@
 }
 
 .meme-tag:hover {
-  background: var(--primary);
+  background: var(--primary-color);
   color: white;
   transform: translateY(-2px);
 }
@@ -941,7 +936,7 @@
   width: 80px;
   height: 80px;
   margin: 0 auto 20px;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  background: linear-gradient(135deg, var(--primary), var(--secondary-color));
   color: white;
   border-radius: 50%;
   display: flex;
@@ -1036,52 +1031,7 @@
 
 /* Loader */
 .loader {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 20px;
-  color: var(--accent);
-}
-
-.loader i {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Toast notifications */
-.toast {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 15px 20px;
-  border-radius: 5px;
-  color: white;
-  transform: translateY(100px);
-  opacity: 0;
-  transition: all 0.3s ease;
-  z-index: 1000;
-}
-
-.toast.show {
-  transform: translateY(0);
-  opacity: 1;
-}
-
-.toast-success {
-  background-color: var(--success);
-}
-
-.toast-error {
-  background-color: var(--danger);
+  display: none;
 }
 
 /* Empty states */
@@ -1143,37 +1093,6 @@
   display: flex;
   gap: 10px;
   margin-top: 10px;
-}
-
-/* Loading animation for buttons */
-.btn-loading {
-  position: relative;
-  pointer-events: none;
-}
-
-.btn-loading::after {
-  content: "";
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  margin: auto;
-  border: 2px solid transparent;
-  border-top-color: white;
-  border-radius: 50%;
-  animation: button-loading-spinner 1s linear infinite;
-}
-
-@keyframes button-loading-spinner {
-  from {
-    transform: rotate(0turn);
-  }
-  to {
-    transform: rotate(1turn);
-  }
 }
 
 /* Tooltips */
@@ -1276,34 +1195,6 @@
   .search-bar {
     width: 100%;
   }
-}
-
-/* Global Loader Styles */
-.global-loader {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-.global-loader .loader-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
-  color: white;
-  font-size: 1.2rem;
-}
-
-.global-loader .loader-content i {
-  font-size: 3rem;
-  color: var(--accent);
 }
 
 /* Base styles and theme transitions */
